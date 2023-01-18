@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "795491107509",
+    "project_id": "cabrioletsochi-77196",
+    "storage_bucket": "cabrioletsochi-77196.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795491107509:android:6b614557a21883c200b4fc",
+        "android_client_info": {
+          "package_name": "uz.futuretechnologiesinc.presidentftinc.cabriolet_sochi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "795491107509-1h44eod9p4ajqg4mb3qepg890ptcrtle.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKOd_ze6wzmGD1pQDaMCTZ-P-QzWA-5lY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "795491107509-1h44eod9p4ajqg4mb3qepg890ptcrtle.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
