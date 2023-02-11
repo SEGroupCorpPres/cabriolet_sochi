@@ -4,6 +4,7 @@ import 'package:cabriolet_sochi/src/constants/colors.dart';
 import 'package:cabriolet_sochi/src/constants/sizes.dart';
 import 'package:cabriolet_sochi/src/features/account/presentation/account_page.dart';
 import 'package:cabriolet_sochi/src/features/checkout/presentation/successful_checkout.dart';
+import 'package:cabriolet_sochi/src/utils/widgets/account_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/account_page_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/app_bar_title.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/main_button.dart';
@@ -12,8 +13,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../../utils/widgets/account_button.dart';
 
 class ConfirmOrderPage extends StatefulWidget {
   const ConfirmOrderPage({super.key});
@@ -89,10 +88,9 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                 child: Form(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 10.0, top: 20).r,
+                        padding: const EdgeInsets.only(left: 10, top: 20).r,
                         child: Text(
                           'Дата и время начала аренды *',
                           style: GoogleFonts.montserrat(
@@ -122,7 +120,6 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                                 borderRadius: BorderRadius.circular(10).r,
                                 borderSide: const BorderSide(
                                   color: Colors.grey,
-                                  width: 1,
                                 ),
                               ),
                               hintText: '23/01/2023',
@@ -152,7 +149,6 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                                 borderRadius: BorderRadius.circular(10),
                                 borderSide: const BorderSide(
                                   color: Colors.grey,
-                                  width: 1,
                                 ),
                               ),
                               hintText: '12:00',
@@ -198,7 +194,6 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                                 borderRadius: BorderRadius.circular(10).r,
                                 borderSide: const BorderSide(
                                   color: Colors.grey,
-                                  width: 1,
                                 ),
                               ),
                               hintText: '23/01/2023',
@@ -228,7 +223,6 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                                 borderRadius: BorderRadius.circular(10).r,
                                 borderSide: const BorderSide(
                                   color: Colors.grey,
-                                  width: 1,
                                 ),
                               ),
                               hintText: '12:00',
@@ -270,7 +264,6 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                           borderRadius: BorderRadius.circular(10).r,
                           borderSide: const BorderSide(
                             color: Colors.grey,
-                            width: 1,
                           ),
                         ),
                         contentPaddingHorizontal: 10,
@@ -307,7 +300,6 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                           borderRadius: BorderRadius.circular(10).r,
                           borderSide: const BorderSide(
                             color: Colors.grey,
-                            width: 1,
                           ),
                         ),
                         contentPaddingHorizontal: 10,

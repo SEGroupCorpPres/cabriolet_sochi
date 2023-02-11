@@ -9,6 +9,8 @@ class AuthenticationProvider extends BaseAuthenticationProvider {
 
   @override
   Future<bool> isLoggedIn() async {
+    // final preferences = await SharedPreferences.getInstance();
+    // final userId = preferences.getString('userId');
     final firebaseUser = _firebaseAuth.currentUser;
     return firebaseUser != null && firebaseUser.uid.isNotEmpty;
   }
@@ -66,7 +68,7 @@ class AuthenticationProvider extends BaseAuthenticationProvider {
         .then(
       (value) async {
         final preferences = await SharedPreferences.getInstance();
-        await preferences.setString('userId', user.id ?? '');
+        await preferences.setString('userId', user.id ?? _firebaseAuth.currentUser!.uid);
       },
     );
   }

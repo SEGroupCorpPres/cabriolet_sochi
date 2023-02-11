@@ -10,7 +10,7 @@ part 'authentication_state.dart';
 class AuthenticationCubit extends Cubit<AuthenticationState> {
   AuthenticationCubit() : super(const AuthenticationState(status: AuthenticationStatus.initial));
 
-  final _authenticationRepository = AuthenticationRepostory();
+  final _authenticationRepository = AuthenticationRepository();
 
   void phoneNumberChanged(String phone) {
     emit(
@@ -76,7 +76,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
 
   Future<void> phoneVerificationCompleted(AuthCredential credential) async {
     try {
-      var user = await _authenticationRepository.signInWithCredential(credential);
+      final user = await _authenticationRepository.signInWithCredential(credential);
       if (user != null) {
         emit(state.copyWith(status: AuthenticationStatus.otpVerificationSuccess));
         // SAVE USER TO DATABASE

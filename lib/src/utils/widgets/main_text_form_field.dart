@@ -16,6 +16,7 @@ class MainTextFormField extends StatelessWidget {
   final double height;
   final Color bgColor;
   final double borderR;
+  final void Function()? onTap;
   final TextInputType keyboardType;
   final InputBorder border;
   final double contentPaddingHorizontal;
@@ -37,6 +38,7 @@ class MainTextFormField extends StatelessWidget {
     required this.height,
     required this.bgColor,
     required this.borderR,
+    this.onTap,
     required this.keyboardType,
     required this.border,
     required this.contentPaddingHorizontal,
@@ -73,6 +75,7 @@ class MainTextFormField extends StatelessWidget {
                 borderRadius: BorderRadius.circular(borderR).r,
               ),
               child: TextFormField(
+                onTap: onTap,
                 controller: textEditingController,
                 style: GoogleFonts.montserrat(),
                 keyboardType: keyboardType,
@@ -90,14 +93,14 @@ class MainTextFormField extends StatelessWidget {
                   suffixIcon: icon == null
                       ? Container()
                       : Padding(
-                          padding: EdgeInsetsDirectional.only(end: 5.w, start: 0.w),
-                          child: SvgPicture.asset(
-                            icon!,
-                            color: Colors.grey.withOpacity(0.5),
-                            height: 20.r,
-                            width: 20.r,
-                          ),
-                        ),
+                    padding: EdgeInsetsDirectional.only(end: 5.w, start: 0.w),
+                    child: SvgPicture.asset(
+                      icon!,
+                      color: Colors.grey.withOpacity(0.5),
+                      height: 20.r,
+                      width: 20.r,
+                    ),
+                  ),
                   suffixIconConstraints: const BoxConstraints.expand(width: 20, height: 20).r,
                 ),
                 validator: validator,

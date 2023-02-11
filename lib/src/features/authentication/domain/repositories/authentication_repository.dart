@@ -3,7 +3,7 @@ import 'package:cabriolet_sochi/src/features/authentication/domain/repositories/
 import 'package:cabriolet_sochi/src/features/authentication/domain/repositories/base/base_autentication_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class AuthenticationRepostory {
+class AuthenticationRepository {
   final BaseAuthenticationProvider _authenticationProvider = AuthenticationProvider();
 
   Future<bool> isLoggedIn() => _authenticationProvider.isLoggedIn();

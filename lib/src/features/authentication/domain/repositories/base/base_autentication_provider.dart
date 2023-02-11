@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 abstract class BaseAuthenticationProvider {
   Future<bool> isLoggedIn();
 
-
   Future<void> sendOtp({
     required String phoneNumber,
     required PhoneVerificationCompleted phoneVerificationCompleted,

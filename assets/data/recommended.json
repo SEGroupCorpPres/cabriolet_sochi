@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "image": "https://cabrioletsochi.ru/wp-content/webp-express/webp-images/uploads/2022/06/arenda-aston-martin-v-sochi.jpg.webp",
+    "name": "Aston Martin",
+    "model": "DB11",
+    "description": "DB11 2019 г.в.",
+    "color": "black",
+    "rental_price": 80000,
+    "deposit": 120000
+  },
+  {
+    "id": 2,
+    "image": "https://cabrioletsochi.ru/wp-content/webp-express/webp-images/uploads/2022/06/arenda-kabrioleta-mercedes-gt-v-sochi-1.jpg.webp",
+    "name": "Mercedes",
+    "model": "AMG GT S",
+    "description": "557 l.s. 2021g.v",
+    "color": "blue",
+    "rental_price": 60000,
+    "deposit": 120000
+  },
+  {
+    "id": 3,
+    "image": "https://cabrioletsochi.ru/wp-content/webp-express/webp-images/uploads/2022/06/arenda-bmw-i8-v-sochi.jpg.webp",
+    "name": "BMW",
+    "model": "i8",
+    "description": "i8 2015 г.в.",
+    "color": "white",
+    "rental_price": 30000,
+    "deposit": 60000
+  },
+  {
+    "id": 4,
+    "image": "https://cabrioletsochi.ru/wp-content/webp-express/webp-images/uploads/2022/06/arenda-kabrioletov-porsche-boxster-s-718-v-sochi-2.jpg.webp",
+    "name": "Porsche",
+    "model": "Boxster 718 GTS",
+    "description": "Boxster 718 GTS 2019 г.в.",
+    "color": "white",
+    "rental_price": 30000,
+    "deposit": 60000
+  },
+  {
+    "id": 5,
+    "image": "https://cabrioletsochi.ru/wp-content/webp-express/webp-images/uploads/2022/06/arenda-kabrioletov-v-sochi.-shevrole-korvet-s7-stingray-3-1536x1152.jpg.webp",
+    "name": "Chevrolet",
+    "model": "Corvette C7",
+    "description": "Corvette C7 2017 г.в.",
+    "color": "blue",
+    "rental_price": 18000,
+    "deposit": 45000
+  }
+]

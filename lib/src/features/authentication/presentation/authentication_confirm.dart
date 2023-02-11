@@ -3,13 +3,17 @@ import 'dart:io';
 
 import 'package:cabriolet_sochi/src/constants/colors.dart';
 import 'package:cabriolet_sochi/src/constants/sizes.dart';
+import 'package:cabriolet_sochi/src/features/account/presentation/account_page.dart';
 import 'package:cabriolet_sochi/src/features/authentication/bloc/authentication_cubit.dart';
+import 'package:cabriolet_sochi/src/features/authentication/presentation/sign_up_screen.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/account_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/app_bar_title.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:timer_count_down/timer_controller.dart';
 
@@ -27,12 +31,9 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
 
   TextEditingController textEditingController = TextEditingController();
 
-  // late final AuthenticationRepository _authenticationRepository;
-
   late String _code = '';
   String signature = '{{ app signature }}';
-
-  String otpCode = '';
+  late String? userId;
   Timer? _timer;
   int _secondsCount = 59;
   int _minuteCount = 2;
@@ -43,16 +44,7 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
   );
 
   @override
-  void codeUpdated() {
-    print("Update code $_code");
-    setState(() {
-      print("codeUpdated");
-    });
-  }
-
-  @override
   void initState() {
-    SmsAutoFill().getAppSignature;
     countdownController.start();
     super.initState();
     setState(() {});
@@ -63,21 +55,20 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
         setState(() {});
       },
     );
-    listenOtp();
+    _listenSmsCode().then((value) async {
+      final preferences = await SharedPreferences.getInstance();
+      userId = preferences.getString('userId');
+    });
   }
 
-  void listenOtp() async {
-    // await SmsAutoFill().unregisterListener();
-    // listenForCode();
-    await SmsAutoFill().listenForCode;
-    print("OTP listen Called");
-  }
-
+  // Future<String?> _getUserId()async{
+  //   final preferences = await SharedPreferences.getInstance();
+  //   final userId = preferences.getString('userId');
+  //   return userId;
+  // }
   @override
   void dispose() {
     _timer!.cancel();
-    // textEditingController.dispose();
-    SmsAutoFill().unregisterListener();
     super.dispose();
   }
 
@@ -108,9 +99,29 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
       ),
       body: BlocListener<AuthenticationCubit, AuthenticationState>(
         listener: (context, state) {
-          // TODO: implement listener}
-          if (state.status == AuthenticationStatus.pendingOtpVerification) {
-            context.read<AuthenticationCubit>().sendOtp();
+          // TODO: implement listener
+          if (state.status == AuthenticationStatus.authenticated) {
+            if (userId != null || userId!.isNotEmpty) {
+              Navigator.of(context).push(
+                Platform.isIOS
+                    ? CupertinoPageRoute<void>(
+                        builder: (_) => AccountPage(),
+                      )
+                    : MaterialPageRoute<void>(
+                        builder: (_) => AccountPage(),
+                      ),
+              );
+            } else {
+              Navigator.of(context).push(
+                Platform.isIOS
+                    ? CupertinoPageRoute<void>(
+                        builder: (_) => SignUpScreen(),
+                      )
+                    : MaterialPageRoute<void>(
+                        builder: (_) => SignUpScreen(),
+                      ),
+              );
+            }
           }
         },
         child: Padding(
@@ -139,15 +150,13 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
                 currentCode: _code,
                 onCodeChanged: (code) {
                   if (code!.length == 6) {
-                    Future.delayed(Duration.zero, () {
-                      _code = code;
-                      FocusScope.of(context).requestFocus(FocusNode());
-                      countdownController.pause();
-                    });
-                    context.read<AuthenticationCubit>().otpChanged(code);
+                    _code = code;
+                    countdownController.pause();
+                    context.read<AuthenticationCubit>().otpChanged(_code);
                   }
                 },
                 controller: textEditingController,
+                cursor: Cursor(color: AppColors.mainColor),
               ),
               SizedBox(height: 10.h),
               Center(
@@ -173,11 +182,12 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
                             const Duration(seconds: 1),
                             (timer) {
                               _secondsCount -= 1;
-                              setState(() {
-                                context.read<AuthenticationCubit>().sendOtp();
-                              });
+                              setState(() {});
                             },
                           );
+                        }
+                        if (_minuteCount == 0 && _secondsCount == 0) {
+                          context.read<AuthenticationCubit>().sendOtp();
                         }
                       },
                       child: Text(
@@ -193,5 +203,9 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
         ),
       ),
     );
+  }
+
+  Future<void> _listenSmsCode() async {
+    await SmsAutoFill().listenForCode();
   }
 }

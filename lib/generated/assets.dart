@@ -12,6 +12,8 @@ class Assets {
   static const String carInfoMercedes = 'assets/images/car_info/mercedes.jpg';
   static const String carInfoPeople = 'assets/icons/car_info/people.svg';
   static const String carInfoRightVector = 'assets/icons/car_info/right_vector.svg';
+  static const String dataFakeData = 'assets/data/fake_data.json';
+  static const String dataRecommended = 'assets/data/recommended.json';
   static const String filterCalendar = 'assets/icons/home_list/filter/calendar.svg';
   static const String filterCarEngine = 'assets/icons/home_list/filter/car_engine.svg';
   static const String filterLogo1 = 'assets/icons/home_list/filter/logo1.png';

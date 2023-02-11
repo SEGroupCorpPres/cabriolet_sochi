@@ -5,7 +5,9 @@ import 'package:cabriolet_sochi/src/constants/sizes.dart';
 import 'package:cabriolet_sochi/src/features/account/presentation/account_page.dart';
 import 'package:cabriolet_sochi/src/features/orders/presentation/confirm_order.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/account_button.dart';
+import 'package:cabriolet_sochi/src/utils/widgets/account_page_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/app_bar_title.dart';
+import 'package:cabriolet_sochi/src/utils/widgets/less_car_info.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/main_button.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,9 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../../utils/widgets/account_page_button.dart';
-import '../../../utils/widgets/less_car_info.dart';
 
 class ProductOverview extends StatefulWidget {
   const ProductOverview({super.key});
@@ -31,7 +30,6 @@ class _ProductOverviewState extends State<ProductOverview> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: true,
         leading: AccountButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: Icons.adaptive.arrow_back,
@@ -44,7 +42,6 @@ class _ProductOverviewState extends State<ProductOverview> {
         ),
       ),
       body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -63,7 +60,6 @@ class _ProductOverviewState extends State<ProductOverview> {
                         options: CarouselOptions(
                           height: 250.h,
                           viewportFraction: 1,
-                          autoPlay: false,
                           enlargeFactor: 1,
                         ),
                         carouselController: buttonCarouselController,
@@ -215,8 +211,6 @@ class _ProductOverviewState extends State<ProductOverview> {
                     ),
                   ),
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       SvgPicture.asset(
                         'assets/icons/car_info/bail.svg',
@@ -341,7 +335,7 @@ AUX, Bluetooth, аудиосистема Burmester
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 15.0).r,
+                    padding: const EdgeInsets.symmetric(vertical: 15).r,
                     child: Text(
                       'Рекомендуем',
                       style: GoogleFonts.montserrat(
@@ -404,12 +398,12 @@ AUX, Bluetooth, аудиосистема Burmester
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10.0).r,
+                            padding: const EdgeInsets.symmetric(vertical: 10).r,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1).r,
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1).r,
                                   child: Text(
                                     'Aston Martin DB11',
                                     style: GoogleFonts.montserrat(
@@ -419,7 +413,7 @@ AUX, Bluetooth, аудиосистема Burmester
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1).r,
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1).r,
                                   child: Text(
                                     '510 л.с. 2019 г.в.',
                                     style: GoogleFonts.montserrat(
@@ -429,7 +423,7 @@ AUX, Bluetooth, аудиосистема Burmester
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1).r,
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1).r,
                                   child: Text(
                                     'черный',
                                     style: GoogleFonts.montserrat(
@@ -439,7 +433,7 @@ AUX, Bluetooth, аудиосистема Burmester
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 2.0).r,
+                                  padding: const EdgeInsets.symmetric(vertical: 2).r,
                                   child: Container(
                                     height: 25,
                                     width: 150,
@@ -463,7 +457,7 @@ AUX, Bluetooth, аудиосистема Burmester
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1).r,
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1).r,
                                   child: Text(
                                     'залог 120 000 ₽',
                                     style: GoogleFonts.montserrat(

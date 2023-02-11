@@ -8,7 +8,6 @@ class UserModel {
     this.imageUrl,
     this.creationDateTimeMillis,
     this.dateOfBirthTimeMillis,
-    this.countryCode,
   });
 
   // UserModel.fromDocumentSnapshot(DocumentSnapshot<Map<String, dynamic>> doc)
@@ -17,17 +16,9 @@ class UserModel {
   //       displayName = doc.data()!['displayName'].toString(),
   //       displayImg = doc.data()!['displayImg'].toString(),
   //       dateBirth = doc.data()!['dateBirth'] as DateTime;
-  final String? id, firstName, phoneNumber, imageUrl, countryCode;
+  final String? id, firstName, phoneNumber, imageUrl;
   final int? creationDateTimeMillis, dateOfBirthTimeMillis;
 
-  // Map<String, dynamic> toMap() {
-  //   return {
-  //     'phoneNumber': phoneNumber,
-  //     'displayName': displayName,
-  //     'displayImg': displayImg,
-  //     'dateBirth': dateBirth,
-  //   };
-  // }
   factory UserModel.fromJson(Map<String, dynamic> data) {
     return UserModel(
       id: data['id'].toString(),
@@ -36,7 +27,6 @@ class UserModel {
       imageUrl: data['imageUrl'].toString(),
       creationDateTimeMillis: int.parse(data['creationDateTimeMillis'].toString()),
       dateOfBirthTimeMillis: int.parse(data['dateOfBirthTimeMillis'].toString()),
-      countryCode: data['countryCode'].toString(),
     );
   }
 
@@ -48,7 +38,6 @@ class UserModel {
       'imageUrl': imageUrl,
       'creationDateTimeMillis': creationDateTimeMillis,
       'dateOfBirthTimeMillis': dateOfBirthTimeMillis,
-      'countryCode': countryCode,
     };
   }
 
