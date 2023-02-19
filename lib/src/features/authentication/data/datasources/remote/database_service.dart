@@ -14,12 +14,12 @@
 //
 //   Future<List<UserModel>> retrieveUserData() async {
 //     final snapshot = await _db.collection('Users').get();
-//     return snapshot.docs.map((UserModel userModel) => userModel.toJson()).toList();
+//     return snapshot.docs.map((UserModel userModel) => userModel.toJson()).toList().;
 //   }
 //
 //   Future<String> retrieveUserName(UserModel user) async {
-//     final snapshot = await _db.collection('Users').doc(user.firstName).get();
-//     return snapshot.data()!['displayName'].toString();
+//     final snapshot = await _db.collection('Users').doc(user.fullName).get();
+//     return snapshot.data()!['fullName'].toString();
 //   }
 //
 //   Future<String> retrieveUserPhone(UserModel user) async {
@@ -33,7 +33,7 @@
 //   }
 //
 //   Future<String> retrieveUserDateBirth(UserModel user) async {
-//     final snapshot = await _db.collection('Users').doc(user.dateOfBirthTimeMillis.toString()).get();
+//     final snapshot = await _db.collection('Users').doc(user.dateOfBirth.toString()).get();
 //     return snapshot.data()!['dateBirth'].toString();
 //   }
 //

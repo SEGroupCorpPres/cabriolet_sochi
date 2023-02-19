@@ -3,17 +3,23 @@ import 'dart:io';
 import 'package:cabriolet_sochi/src/constants/colors.dart';
 import 'package:cabriolet_sochi/src/constants/sizes.dart';
 import 'package:cabriolet_sochi/src/features/account/presentation/account_page.dart';
+import 'package:cabriolet_sochi/src/features/authentication/bloc/authentication_cubit.dart';
+import 'package:cabriolet_sochi/src/features/authentication/data/models/user_model.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/app_bar_title.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/main_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/main_text_form_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -34,15 +40,79 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController _phoneTextEditingController = TextEditingController();
   TextEditingController _nameTextEditingController = TextEditingController();
   TextEditingController _dateTextEditingController = TextEditingController();
-  DateTime _date = DateTime(2020);
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  DateTime _date = DateTime.now();
+  final DateTime _dateForAge = DateTime.now();
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   File? imageFile;
+  String? imageUrl;
+  bool _isLoading = false;
 
+  Future<void> _userPhoneNumber()async {
+    final preferences = await SharedPreferences.getInstance();
+    _phoneTextEditingController.text += preferences.getString('phone') ?? '+';
+    // print(object)
+  }
   @override
-  void initState() {
+  void initState(){
     // TODO: implement initState
     super.initState();
+    _userPhoneNumber();
+  }
+
+  Future<void> _saveUserDataToFirebaseFirestore() async {
+    final isValid = _formKey.currentState!.validate();
+    if (isValid) {
+      setState(() {
+        _isLoading = true;
+      });
+      _formKey.currentState!.save();
+      try {
+        if(imageFile ==  null){
+          print('Пожалуйста, выберите изображение');
+        } else {
+          final ref = FirebaseStorage.instance.ref().child('userimages').child(_nameTextEditingController.text + '.jpg');
+          await ref.putFile(imageFile!);
+          imageUrl = await ref.getDownloadURL();
+          final user = UserModel(
+            fullName: _nameTextEditingController.text,
+            dateOfBirth: _date,
+            imageUrl: imageUrl,
+            phoneNumber: _phoneTextEditingController.text,
+            id: _firebaseAuth.currentUser!.uid,
+          );
+          await context.read<AuthenticationCubit>().saveUserProfile(user);
+          await Navigator.of(context).pushReplacement(
+            Platform.isIOS
+                ? CupertinoPageRoute(
+              builder: (_) => const AccountPage(),
+            )
+                : MaterialPageRoute(
+              builder: (_) => const AccountPage(),
+            ),
+          );
+        }
+      } catch (error) {
+        print('error occurred ${error.toString()}');
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    // populateView();
+    super.didChangeDependencies();
+  }
+
+  void populateView() {
+    _nameTextEditingController.text = context.read<AuthenticationCubit>().state.userModel?.fullName ?? '';
+    _phoneTextEditingController.text = context.read<AuthenticationCubit>().state.phoneNumber ?? '';
+    imageUrl = context.read<AuthenticationCubit>().state.userModel?.imageUrl.toString();
   }
 
   Future<void> _getFromCamera() async {
@@ -57,13 +127,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
     );
-    await _cropImage(pickedFile!.path);
+    await _cropImage(pickedFile!.path).then((value) => print(imageFile));
     Navigator.pop(context);
   }
 
-  Future<void> _cropImage(filePath) async {
+  Future<void> _cropImage(String filePath) async {
     final croppedImage = await ImageCropper().cropImage(
-      sourcePath: filePath.toString(),
+      sourcePath: filePath,
       maxHeight: 1080,
       maxWidth: 1080,
     );
@@ -73,6 +143,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
     }
   }
+
+  Future<dynamic> _iosBottomSheet() async => showCupertinoModalPopup(
+        context: context,
+        builder: (context) {
+          return CupertinoActionSheet(
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                onPressed: _getFromCamera,
+                child: const Text('Take Photo'),
+              ),
+              CupertinoActionSheetAction(
+                onPressed: _getFromGallery,
+                child: const Text('Choose Photo'),
+              ),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+          );
+        },
+      );
 
   Future<dynamic> _showCupertinoImageDialog() {
     return showCupertinoDialog(
@@ -104,7 +196,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Text(
                     'Галерея',
                     style: GoogleFonts.montserrat(),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -121,30 +213,47 @@ class _SignUpScreenState extends State<SignUpScreen> {
         return AlertDialog(
           title: Text(
             'Пожалуйста, выберите опцию',
-            style: GoogleFonts.montserrat(),
+            style: GoogleFonts.montserrat(
+              color: AppColors.mainColor,
+              fontSize: AppSizes.label,
+            ),
           ),
           actions: [
             MaterialButton(
+              splashColor: AppColors.mainColor.withOpacity(.1),
               onPressed: _getFromCamera,
               child: Row(
                 children: [
-                  Icon(Icons.camera),
+                  const Icon(
+                    Icons.camera,
+                    color: AppColors.mainColor,
+                  ),
+                  SizedBox(width: 10.w),
                   Text(
                     'Камера',
-                    style: GoogleFonts.montserrat(),
-                  )
+                    style: GoogleFonts.montserrat(
+                      fontSize: AppSizes.label,
+                    ),
+                  ),
                 ],
               ),
             ),
             MaterialButton(
+              splashColor: AppColors.mainColor.withOpacity(.1),
               onPressed: _getFromGallery,
               child: Row(
                 children: [
-                  Icon(Icons.image),
+                  const Icon(
+                    Icons.image,
+                    color: AppColors.mainColor,
+                  ),
+                  SizedBox(width: 10.w),
                   Text(
                     'Галерея',
-                    style: GoogleFonts.montserrat(),
-                  )
+                    style: GoogleFonts.montserrat(
+                      fontSize: AppSizes.label,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -167,20 +276,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
           }
           print(_date);
         },
-        initialDateTime: _date,
+        initialDateTime: DateTime(_date.year - 27),
         minimumYear: 1940,
-        maximumDate: DateTime(2020, 12, 31),
+        maximumDate: DateTime(_dateForAge.year - 27, 12, 31),
       ),
     );
     print('cupertino');
   }
 
   Future<void> _materialDatePicker() async {
+    if (_date.year >= _dateForAge.year - 27) {
+      _date = DateTime(_dateForAge.year - 27);
+    }
     final date = await showDatePicker(
       context: context,
-      initialDate: _date,
+      initialDate: DateTime(_date.year),
       firstDate: DateTime(1940),
-      lastDate: DateTime(2020, 12, 31),
+      lastDate: DateTime(_dateForAge.year - 27, 12, 31),
       helpText: 'ВЫБЕРИТЕ ДАТУ',
       cancelText: 'ОТМЕНА',
       confirmText: 'ВЫБИРАТЬ',
@@ -227,10 +339,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (date != _date) {
       setState(() {
         _date = date!;
+        _dateTextEditingController.text = _dateFormat.format(date);
       });
-      _dateTextEditingController.text = _dateFormat.format(date!);
     }
-    print('material');
+    print(_date);
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _nameTextEditingController.dispose();
+    _phoneTextEditingController.dispose();
+    _dateTextEditingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -279,7 +399,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 widget: null,
                 title: 'Загрузить фотографию',
                 borderWidth: 1.5,
-                height: 35,
+                height: 35.h,
                 width: MediaQuery.of(context).size.width,
                 borderColor: AppColors.mainColor,
                 titleColor: AppColors.mainColor,
@@ -294,6 +414,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 30).r,
                 child: Form(
+                  key: _formKey,
                   child: Column(
                     children: [
                       MainTextFormField(
@@ -304,16 +425,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         labelColor: AppColors.labelColor,
                         marginContainer: 10,
                         width: MediaQuery.of(context).size.width,
-                        height: 35,
+                        height: 35.h,
                         bgColor: const Color(0xffFFE0E0),
                         borderR: 8,
                         keyboardType: TextInputType.text,
                         border: InputBorder.none,
                         contentPaddingHorizontal: 15,
-                        validator: (String? value) {
-                          return (value != null) ? 'Не используйте символ.' : null;
+                        validator: (value) {
+                          return value == null ? 'Фамилия и Имя не должны быть пустыми' : null;
                         },
-                        onSaved: (String? value) {},
+                        onSaved: (value) {},
                         onChanged: (String? value) {},
                       ),
                       MainTextFormField(
@@ -324,16 +445,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         labelColor: AppColors.labelColor,
                         marginContainer: 10,
                         width: MediaQuery.of(context).size.width,
-                        height: 35,
+                        height: 35.h,
                         bgColor: const Color(0xffFFE0E0),
                         borderR: 8,
-                        keyboardType: TextInputType.text,
+                        keyboardType: TextInputType.phone,
                         border: InputBorder.none,
                         contentPaddingHorizontal: 15,
-                        validator: (String? value) {
-                          return (value != null) ? 'Не используйте символ.' : null;
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Область не может быть пустой';
+                          } else if (value.toString().length - 1 < 11) {
+                            return 'Номер телефона должен состоять из 11 цифр.';
+                          }
+                          return null;
                         },
-                        onSaved: (String? value) {},
+                        onSaved: (value) {},
                         onChanged: (String? value) {},
                       ),
                       MainTextFormField(
@@ -344,15 +470,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         labelColor: AppColors.labelColor,
                         marginContainer: 10,
                         width: MediaQuery.of(context).size.width,
-                        height: 35,
+                        height: 35.h,
                         bgColor: const Color(0xffFFE0E0),
                         borderR: 8,
                         onTap: Platform.isIOS ? _cupertinoDatePicker : _materialDatePicker,
                         keyboardType: TextInputType.text,
                         border: InputBorder.none,
                         contentPaddingHorizontal: 15,
-                        validator: (String? value) {},
-                        onSaved: (value) => _date = value! as DateTime,
+                        validator: (value) {
+                          return null;
+                        },
+                        onSaved: (value) {
+                          // _date=value as DateTime;
+                          // print(value);
+                        },
                         onChanged: (String? value) {},
                       ),
                     ],
@@ -385,22 +516,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 widget: null,
                 title: 'Сохранить',
                 borderWidth: 0,
-                height: 40,
+                height: 40.h,
                 width: MediaQuery.of(context).size.width,
                 borderColor: Colors.transparent,
                 titleColor: Colors.white,
                 bgColor: AppColors.mainColor,
                 fontSize: AppSizes.mainButtonText,
                 fontWeight: FontWeight.w400,
-                onTap: () => Navigator.of(context).pushReplacement(
-                  Platform.isIOS
-                      ? CupertinoPageRoute(
-                          builder: (_) => const AccountPage(),
-                        )
-                      : MaterialPageRoute(
-                          builder: (_) => const AccountPage(),
-                        ),
-                ),
+                onTap: _saveUserDataToFirebaseFirestore,
                 borderRadius: 8,
               ),
               const SizedBox(height: 50),

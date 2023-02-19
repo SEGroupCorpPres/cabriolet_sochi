@@ -26,14 +26,14 @@ class AuthenticationConfirm extends StatefulWidget {
   State<AuthenticationConfirm> createState() => _AuthenticationConfirmState();
 }
 
-class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
+class _AuthenticationConfirmState extends State<AuthenticationConfirm> with CodeAutoFill{
   CountdownController countdownController = CountdownController();
 
   TextEditingController textEditingController = TextEditingController();
 
   late String _code = '';
   String signature = '{{ app signature }}';
-  late String? userId;
+  late String? uid;
   Timer? _timer;
   int _secondsCount = 59;
   int _minuteCount = 2;
@@ -42,7 +42,12 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
     fontSize: 40.sp,
     fontWeight: FontWeight.w800,
   );
-
+  @override
+  void codeUpdated() {
+    setState(() {
+      _code = code!;
+    });
+  }
   @override
   void initState() {
     countdownController.start();
@@ -55,21 +60,19 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
         setState(() {});
       },
     );
-    _listenSmsCode().then((value) async {
-      final preferences = await SharedPreferences.getInstance();
-      userId = preferences.getString('userId');
-    });
+    listenForCode();
   }
 
-  // Future<String?> _getUserId()async{
-  //   final preferences = await SharedPreferences.getInstance();
-  //   final userId = preferences.getString('userId');
-  //   return userId;
-  // }
+  Future<void> _getUserID()async{
+    final prefs = await SharedPreferences.getInstance();
+    uid = prefs.getString('uid');
+  }
+
   @override
   void dispose() {
     _timer!.cancel();
     super.dispose();
+    cancel();
   }
 
   @override
@@ -100,8 +103,12 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
       body: BlocListener<AuthenticationCubit, AuthenticationState>(
         listener: (context, state) {
           // TODO: implement listener
+          // final prefs = await SharedPreferences.getInstance();
+          // uid = prefs.getString('uid');
+          _getUserID();
           if (state.status == AuthenticationStatus.authenticated) {
-            if (userId != null || userId!.isNotEmpty) {
+            if (uid != null && uid!.isNotEmpty) {
+              print('user Id: $uid');
               Navigator.of(context).push(
                 Platform.isIOS
                     ? CupertinoPageRoute<void>(
@@ -203,9 +210,5 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
         ),
       ),
     );
-  }
-
-  Future<void> _listenSmsCode() async {
-    await SmsAutoFill().listenForCode();
   }
 }

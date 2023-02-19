@@ -59,12 +59,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
 
   Future<void> sendOtp() async {
     final phoneNumber = state.phoneNumber!;
-    // if (phoneNumber.isNotEmpty && phoneNumber[0] == '0') {
-    //   phoneNumber = phoneNumber.substring(1);
-    // }
-
     print(phoneNumber);
-
     await _authenticationRepository.sendOtp(
       phoneNumber: phoneNumber,
       phoneVerificationCompleted: phoneVerificationCompleted,

@@ -3,41 +3,62 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class UserModel {
   UserModel({
     this.id,
-    this.firstName,
+    this.fullName,
     this.phoneNumber,
     this.imageUrl,
-    this.creationDateTimeMillis,
-    this.dateOfBirthTimeMillis,
+    this.dateOfBirth,
   });
 
-  // UserModel.fromDocumentSnapshot(DocumentSnapshot<Map<String, dynamic>> doc)
-  //     : uid = doc.id,
-  //       phoneNumber = doc.data()!['phoneNumber'].toString(),
-  //       displayName = doc.data()!['displayName'].toString(),
-  //       displayImg = doc.data()!['displayImg'].toString(),
-  //       dateBirth = doc.data()!['dateBirth'] as DateTime;
-  final String? id, firstName, phoneNumber, imageUrl;
-  final int? creationDateTimeMillis, dateOfBirthTimeMillis;
+  // factory City.fromFirestore(
+  //     DocumentSnapshot<Map<String, dynamic>> snapshot,
+  //     SnapshotOptions? options,
+  //     ) {
+  //   final data = snapshot.data();
+  //   return City(
+  //     name: data?['name'],
+  //     state: data?['state'],
+  //     country: data?['country'],
+  //     capital: data?['capital'],
+  //     population: data?['population'],
+  //     regions:
+  //     data?['regions'] is Iterable ? List.from(data?['regions']) : null,
+  //   );
+  // }
+  factory UserModel.fromDocumentSnapshot(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    SnapshotOptions? options,
+  ) {
+    final data = snapshot.data();
+
+    return UserModel(
+      id: data!['id'] as String,
+      phoneNumber: data['phoneNumber'].toString(),
+      fullName: data['fullName'].toString(),
+      imageUrl: data['imageUrl'].toString(),
+      // dateOfBirth: data['dateOfBirth'] as DateTime,
+    );
+  }
+
+  final String? id, fullName, phoneNumber, imageUrl;
+  final DateTime? dateOfBirth;
 
   factory UserModel.fromJson(Map<String, dynamic> data) {
     return UserModel(
-      id: data['id'].toString(),
-      firstName: data['firstName'].toString(),
-      phoneNumber: data['phoneNumber'].toString(),
-      imageUrl: data['imageUrl'].toString(),
-      creationDateTimeMillis: int.parse(data['creationDateTimeMillis'].toString()),
-      dateOfBirthTimeMillis: int.parse(data['dateOfBirthTimeMillis'].toString()),
+      id: data['id'] as String,
+      fullName: data['fullName'] as String,
+      phoneNumber: data['phoneNumber'] as String,
+      imageUrl: data['imageUrl'] as String,
+      dateOfBirth: data['dateOfBirth'] as DateTime,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'firstName': firstName,
+      'fullName': fullName,
       'phoneNumber': phoneNumber,
       'imageUrl': imageUrl,
-      'creationDateTimeMillis': creationDateTimeMillis,
-      'dateOfBirthTimeMillis': dateOfBirthTimeMillis,
+      'dateOfBirth': dateOfBirth,
     };
   }
 

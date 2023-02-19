@@ -1,15 +1,17 @@
 import 'dart:io';
 
-import 'package:cabriolet_sochi/app/bloc/app_bloc.dart';
 import 'package:cabriolet_sochi/src/constants/colors.dart';
 import 'package:cabriolet_sochi/src/constants/sizes.dart';
+import 'package:cabriolet_sochi/src/features/account/bloc/account_bloc.dart';
+import 'package:cabriolet_sochi/src/features/account/domain/repositories/account_repository.dart';
+import 'package:cabriolet_sochi/src/features/authentication/presentation/authentication_screen.dart';
 import 'package:cabriolet_sochi/src/features/authentication/presentation/sign_up_screen.dart';
 import 'package:cabriolet_sochi/src/features/cart/presentation/cart_history_page.dart';
 import 'package:cabriolet_sochi/src/features/home/presentation/pages/home.dart';
-import 'package:cabriolet_sochi/src/features/orders/presentation/confirm_order.dart';
-import 'package:cabriolet_sochi/src/utils/widgets/acccount_menu_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/account_button.dart';
+import 'package:cabriolet_sochi/src/utils/widgets/account_menu_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/app_bar_title.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,10 +28,24 @@ class AccountPage extends StatefulWidget {
 
 class _AccountPageState extends State<AccountPage> {
   late bool isChecked = false;
+  Map<String, dynamic> user = {};
+  final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+  final AccountRepository accountRepository = AccountRepository();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    accountRepository.getUserData();
+    BlocProvider.of<AccountBloc>(context).add(GetData());
+  }
 
   @override
   Widget build(BuildContext context) {
+    print('Account Repository: ${accountRepository.getUserData()}');
+    final scaffoldState = GlobalKey<ScaffoldState>();
     return Scaffold(
+      key: scaffoldState,
       appBar: AppBar(
         leading: AccountButton(
           onPressed: () => Navigator.of(context).pushReplacement(
@@ -72,131 +88,144 @@ class _AccountPageState extends State<AccountPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Center(
-            child: Column(
+      body: BlocBuilder<AccountBloc, AccountState>(
+        builder: (context, state) {
+          print('Account State ---> $state');
+          if (state is UserDataLoaded) {
+            user = state.userData;
+            print(user);
+            return Column(
               children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 20).r,
-                  width: 100.r,
-                  height: 100.r,
-                  decoration: BoxDecoration(
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/profile/sulaymon.png'),
-                      fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.circular(60).r,
-                  ),
-                ),
-                Align(
-                  child: Text(
-                    'Sulaymon O`rinov',
-                    style: GoogleFonts.montserrat(
-                      color: Colors.black,
-                      fontSize: AppSizes.title,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                Column(
-                  children: [
-                    Text(
-                      'Телефон',
-                      style: GoogleFonts.montserrat(
-                        color: AppColors.labelColor,
-                        fontSize: AppSizes.mainLabel,
-                        fontWeight: FontWeight.w500,
+                Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 20).r,
+                        width: 100.r,
+                        height: 100.r,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(user['imageUrl'].toString()),
+                            fit: BoxFit.cover,
+                          ),
+                          borderRadius: BorderRadius.circular(60).r,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 3.h),
-                    Text(
-                      '+998999666886',
-                      style: GoogleFonts.montserrat(
-                        color: Colors.black,
-                        fontSize: AppSizes.mainButtonText,
-                        fontWeight: FontWeight.w400,
+                      Align(
+                        child: Text(
+                          user['fullName'].toString(),
+                          style: GoogleFonts.montserrat(
+                            color: Colors.black,
+                            fontSize: AppSizes.title,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 10.0).r,
-                  child: AccountMenuButton(
-                    title: 'История заказов',
-                    widget: _menuIconButton(
-                      () => Navigator.of(context).push(
-                        Platform.isIOS
-                            ? CupertinoPageRoute(
-                                builder: (_) => const CartHistoryPage(),
-                              )
-                            : MaterialPageRoute(
-                                builder: (_) => const CartHistoryPage(),
-                              ),
-                      ),
-                    ),
-                  ),
-                ),
-                AccountMenuButton(
-                  title: 'Оплатить заказ',
-                  widget: _menuIconButton(
-                    () => Navigator.of(context).push(
-                      Platform.isIOS
-                          ? CupertinoPageRoute(
-                              builder: (_) => const ConfirmOrderPage(),
-                            )
-                          : MaterialPageRoute(
-                              builder: (_) => const ConfirmOrderPage(),
+                      SizedBox(height: 20.h),
+                      Column(
+                        children: [
+                          Text(
+                            'Телефон',
+                            style: GoogleFonts.montserrat(
+                              color: AppColors.labelColor,
+                              fontSize: AppSizes.mainLabel,
+                              fontWeight: FontWeight.w500,
                             ),
-                    ),
-                  ),
-                ),
-                AccountMenuButton(
-                  title: 'Правила и условия',
-                  widget: _menuIconButton(() => null),
-                ),
-                AccountMenuButton(
-                  title: 'Поддержка',
-                  widget: _menuIconButton(() => null),
-                ),
-                AccountMenuButton(
-                  title: 'Уведомления',
-                  widget: Padding(
-                    padding: const EdgeInsets.only(right: 10).r,
-                    child: Switch.adaptive(
-                      value: isChecked,
-                      onChanged: (value) {
-                        setState(() {
-                          isChecked = value;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  // onTap: () => context.read<AppBloc>().add(const AppLogoutRequested()),
-                  child: ListTile(
-                    title: Text(
-                      'Выйти из аккаунта',
-                      style: GoogleFonts.montserrat(
-                        color: AppColors.mainColor,
-                        fontSize: AppSizes.mainButtonText,
-                        fontWeight: FontWeight.w400,
+                          ),
+                          SizedBox(height: 3.h),
+                          Text(
+                            user['phoneNumber'].toString(),
+                            style: GoogleFonts.montserrat(
+                              color: Colors.black,
+                              fontSize: AppSizes.mainButtonText,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
+                    ],
                   ),
                 ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0).r,
+                        child: AccountMenuButton(
+                          title: 'История заказов',
+                          widget: _menuIconButton(
+                            () => Navigator.of(context).push(
+                              Platform.isIOS
+                                  ? CupertinoPageRoute(
+                                      builder: (_) => const CartHistoryPage(),
+                                    )
+                                  : MaterialPageRoute(
+                                      builder: (_) => const CartHistoryPage(),
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      AccountMenuButton(
+                        title: 'Оплатить заказ',
+                        widget: _menuIconButton(
+                          () => Navigator.of(context).push(
+                            Platform.isIOS
+                                ? CupertinoPageRoute(
+                                    builder: (_) => const AuthenticationScreen(),
+                                  )
+                                : MaterialPageRoute(
+                                    builder: (_) => const AuthenticationScreen(),
+                                  ),
+                          ),
+                        ),
+                      ),
+                      AccountMenuButton(
+                        title: 'Правила и условия',
+                        widget: _menuIconButton(() => null),
+                      ),
+                      AccountMenuButton(
+                        title: 'Поддержка',
+                        widget: _menuIconButton(() => null),
+                      ),
+                      AccountMenuButton(
+                        title: 'Уведомления',
+                        widget: Padding(
+                          padding: const EdgeInsets.only(right: 10).r,
+                          child: Switch.adaptive(
+                            value: isChecked,
+                            onChanged: (value) {
+                              setState(() {
+                                isChecked = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => context.read<AccountBloc>().add(UserSignOutEvent()),
+                        child: ListTile(
+                          title: Text(
+                            'Выйти из аккаунта',
+                            style: GoogleFonts.montserrat(
+                              color: AppColors.mainColor,
+                              fontSize: AppSizes.mainButtonText,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
               ],
-            ),
-          )
-        ],
+            );
+          } else if (state is UserDataLoading) {
+            return const Center(child: CircularProgressIndicator.adaptive());
+          } else {
+            return Container();
+          }
+        },
       ),
     );
   }

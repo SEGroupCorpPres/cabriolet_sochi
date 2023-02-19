@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 
 class AuthenticationScreen extends StatefulWidget {
@@ -32,6 +33,8 @@ class AuthenticationScreen extends StatefulWidget {
 
 class _AuthenticationScreenState extends State<AuthenticationScreen> {
   late TextEditingController phoneTextEditingController;
+   TextEditingController phoneText = TextEditingController();
+
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   late bool isChecked = false;
   final _navigatorKey = GlobalKey<NavigatorState>();
@@ -50,6 +53,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
   void dispose() {
     // TODO: implement dispose
     phoneTextEditingController.dispose();
+    SmsAutoFill().unregisterListener();
     super.dispose();
   }
 
@@ -89,7 +93,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Authenticating...',
+                        'Аутентификация...',
                         style: GoogleFonts.montserrat(),
                       ),
                       const CircularProgressIndicator.adaptive()
@@ -108,7 +112,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                   content: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('OTP Sent...'),
+                      Text('OTP отправлен...'),
                       Icon(Icons.check),
                     ],
                   ),
@@ -138,7 +142,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                   content: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('OTP Verified successfully...'),
+                      Text('OTP успешно подтвержден...'),
                       Icon(Icons.check),
                     ],
                   ),
@@ -164,7 +168,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                   content: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('Updating profile...'),
+                      Text('Обновление профиля...'),
                       CircularProgressIndicator(),
                     ],
                   ),
@@ -181,13 +185,22 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                   content: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('Profile Updated successfully...'),
+                      Text('Профиль успешно обновлен...'),
                       Icon(Icons.check),
                     ],
                   ),
                 ),
               );
-            Navigator.pushReplacementNamed(context, '/home');
+            Navigator.of(context).pushReplacement(
+              Platform.isIOS
+                  ? CupertinoPageRoute(
+                      builder: (_) => const AccountPage(),
+                    )
+                  : MaterialPageRoute(
+                      builder: (_) => const AccountPage(),
+                    ),
+            );
+            // Navigator.pushReplacementNamed(context, '/home');
             // context.read<SignInCubit>().sendOtp();
           }
 
@@ -200,7 +213,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                   content: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(state.error ?? 'Authentication Error'),
+                      Text(state.error ?? 'Ошибка аутентификации'),
                       const Icon(Icons.error),
                     ],
                   ),
@@ -214,33 +227,37 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
               const SizedBox(height: 40),
               Form(
                 key: formKey,
-                child: MainTextFormField(
-                  horizontalPadding: 20,
-                  label: 'Номер телефона',
-                  labelFontSize: AppSizes.mainLabel,
-                  labelColor: AppColors.labelColor,
-                  marginContainer: 10,
-                  width: MediaQuery.of(context).size.width,
-                  height: 32,
-                  bgColor: const Color(0xffEBF7EE),
-                  borderR: 8,
-                  keyboardType: TextInputType.number,
-                  border: InputBorder.none,
-                  contentPaddingHorizontal: 20,
-                  textEditingController: phoneTextEditingController,
-                  validator: (String? value) {
-                    if (value == null) {
-                      return 'Область не может быть пустой';
-                    } else if (value.length - 1 < 11) {
-                      return 'Номер телефона должен состоять из 11 цифр.';
-                    }
-                    return null;
-                  },
-                  onSaved: (String? value) {},
-                  onChanged: (String? value) async {
-                    context.read<AuthenticationCubit>().phoneNumberChanged(value!);
-                    await SmsAutoFill().getAppSignature;
-                  },
+                child: Column(
+                  children: [
+                    MainTextFormField(
+                      horizontalPadding: 20,
+                      label: 'Номер телефона',
+                      labelFontSize: AppSizes.mainLabel,
+                      labelColor: AppColors.labelColor,
+                    marginContainer: 10,
+                      width: MediaQuery.of(context).size.width,
+                      bgColor: const Color(0xffEBF7EE),
+                      borderR: 8,
+                      height: 32.h,
+                      keyboardType: TextInputType.number,
+                      border: InputBorder.none,
+                      contentPaddingHorizontal: 20,
+                      textEditingController: phoneTextEditingController,
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Область не может быть пустой';
+                        } else if (value.toString().length - 1 < 11) {
+                          return 'Номер телефона должен состоять из 11 цифр.';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {},
+                      onChanged: (String? value) async {
+                        context.read<AuthenticationCubit>().phoneNumberChanged(value!);
+                        await SmsAutoFill().getAppSignature;
+                      },
+                    ),
+                  ],
                 ),
               ),
               const Spacer(),
@@ -294,18 +311,20 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                   widget: null,
                   title: 'Далее',
                   borderWidth: 0,
-                  height: 40,
+                  height: 40.h,
                   width: MediaQuery.of(context).size.width,
                   borderColor: Colors.transparent,
                   titleColor: Colors.white,
                   bgColor: AppColors.mainColor,
                   fontSize: AppSizes.mainButtonText,
                   fontWeight: FontWeight.w400,
-                  onTap: () {
+                  onTap: () async {
                     if (formKey.currentState!.validate()) {
                       if (isChecked) {
-                        context.read<AuthenticationCubit>().sendOtp();
+                        await context.read<AuthenticationCubit>().sendOtp();
                       }
+                      final preferences = await SharedPreferences.getInstance();
+                      await preferences.setString('phone', phoneTextEditingController.text);
                     }
                   },
                   borderRadius: 10,

@@ -12,23 +12,31 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_grid_list/responsive_grid_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   static Page<void> page() => Platform.isIOS ? const CupertinoPage(child: HomePage()) : const MaterialPage<void>(child: HomePage());
+
   static Route<void> route() {
     return Platform.isIOS
         ? CupertinoPageRoute<void>(builder: (_) => const HomePage())
         : MaterialPageRoute<void>(
-      builder: (_) => const HomePage(),
-    );
+            builder: (_) => const HomePage(),
+          );
   }
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  late bool isExpanded = true;
+  int? _selectedValueIndex;
+
+
   @override
   void initState() {
     // TODO: implement initState
@@ -82,7 +90,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Container(
                             width: double.infinity,
-                            height: 100.h,
+                            height: 99.h,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15).r,
                               image: const DecorationImage(
@@ -177,47 +185,34 @@ class _HomePageState extends State<HomePage> {
               top: 0,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 17.0).w,
-                child: const FilterButton(),
+                child: _filterButton(),
               ),
             ),
           ],
         ),
       ),
-      floatingActionButton: AccountPageButton(
-        onTap: () => Navigator.of(context).push(
-          Platform.isIOS
-              ? CupertinoPageRoute(
-                  builder: (_) => const AccountPage(),
-                )
-              : MaterialPageRoute(
-                  builder: (_) => const AccountPage(),
-                ),
-        ),
-      ),
+      floatingActionButton: isExpanded ? AccountPageButton(
+                  onTap: () => Navigator.of(context).push(
+                    Platform.isIOS
+                        ? CupertinoPageRoute(
+                      builder: (_) => const AccountPage(),
+                    )
+                        : MaterialPageRoute(
+                      builder: (_) => const AccountPage(),
+                    ),
+                  ),
+                ) : Container(),
     );
   }
-}
-
-class FilterButton extends StatefulWidget {
-  const FilterButton({super.key});
-
-  @override
-  State<FilterButton> createState() => _FilterButtonState();
-}
-
-class _FilterButtonState extends State<FilterButton> {
-  late bool isExpanded = true;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _filterButton(){
     return AnimatedContainer(
       width: ScreenUtil().screenWidth - 40,
       padding: const EdgeInsets.only(left: 25, right: 25).r,
       height: isExpanded
           ? 50
           : ScreenUtil().screenHeight < 800
-              ? ScreenUtil().screenHeight - 50
-              : ScreenUtil().screenHeight - 100,
+          ? ScreenUtil().screenHeight - 50
+          : ScreenUtil().screenHeight - 100,
       curve: Curves.fastLinearToSlowEaseIn,
       duration: const Duration(milliseconds: 500),
       decoration: BoxDecoration(
@@ -242,6 +237,7 @@ class _FilterButtonState extends State<FilterButton> {
             onTap: () {
               setState(() {
                 isExpanded = !isExpanded;
+                // _isExpanded();
               });
             },
             child: SizedBox(
@@ -563,9 +559,14 @@ class _FilterButtonState extends State<FilterButton> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedValueIndex = 0;
+                          });
+                        },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xff626262),
+                            color: _selectedValueIndex == 0 ? const Color(0xff626262) : Colors.transparent,
                             borderRadius: BorderRadius.circular(11).r,
                           ),
                           width: 250.w,
@@ -594,9 +595,14 @@ class _FilterButtonState extends State<FilterButton> {
                         ),
                       ),
                       GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedValueIndex = 1;
+                          });
+                        },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xff626262),
+                            color: _selectedValueIndex == 1 ? const Color(0xff626262) : Colors.transparent,
                             borderRadius: BorderRadius.circular(11).r,
                           ),
                           width: 250.w,
@@ -625,9 +631,14 @@ class _FilterButtonState extends State<FilterButton> {
                         ),
                       ),
                       GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedValueIndex = 2;
+                          });
+                        },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xff626262),
+                            color: _selectedValueIndex == 2 ? const Color(0xff626262) : Colors.transparent,
                             borderRadius: BorderRadius.circular(11).r,
                           ),
                           width: 250.w,
@@ -656,9 +667,14 @@ class _FilterButtonState extends State<FilterButton> {
                         ),
                       ),
                       GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedValueIndex = 3;
+                          });
+                        },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xff626262),
+                            color: _selectedValueIndex == 3 ? const Color(0xff626262) : Colors.transparent,
                             borderRadius: BorderRadius.circular(11).r,
                           ),
                           width: 250.w,
@@ -687,9 +703,14 @@ class _FilterButtonState extends State<FilterButton> {
                         ),
                       ),
                       GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedValueIndex = 4;
+                          });
+                        },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xff626262),
+                            color: _selectedValueIndex == 4 ? const Color(0xff626262) : Colors.transparent,
                             borderRadius: BorderRadius.circular(11).r,
                           ),
                           width: 250.w,
@@ -737,7 +758,12 @@ class _FilterButtonState extends State<FilterButton> {
                     bgColor: Colors.white,
                     fontSize: AppSizes.mainButtonText,
                     fontWeight: FontWeight.w600,
-                    onTap: () {},
+                    onTap: () {
+                      setState(() {
+                        isExpanded = !isExpanded;
+                        // _isExpanded();
+                      });
+                    },
                     borderRadius: 8,
                     widget: null,
                   ),

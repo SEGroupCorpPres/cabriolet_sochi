@@ -24,6 +24,7 @@ class _SuccessfulCheckoutScreenState extends State<SuccessfulCheckoutScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: AppBarTitle(
           title: 'Спасибо за заказ!',
           color: AppColors.mainColor,

@@ -386,7 +386,7 @@ AUX, Bluetooth, аудиосистема Burmester
                         children: [
                           Container(
                             width: ScreenUtil().screenWidth * 0.4,
-                            height: 120.h,
+                            height: 112.h,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15).r,
                               image: const DecorationImage(

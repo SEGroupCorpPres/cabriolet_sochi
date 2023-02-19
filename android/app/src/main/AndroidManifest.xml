@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="uz.futuretechnologiesinc.presidentftinc.cabriolet_sochi">
    <application
-       android:label="cabriolet_sochi"
+       android:label="CabrioletSochi"
        android:name="${applicationName}"
        android:icon="@mipmap/ic_launcher">
        <activity

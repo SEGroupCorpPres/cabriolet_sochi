@@ -24,7 +24,7 @@ class MainTextFormField extends StatelessWidget {
   final String? icon;
   final TextEditingController textEditingController;
   final String? Function(String?)? validator;
-  final Function(String?)? onSaved;
+  final Function(dynamic?)? onSaved;
   final Function(String?) onChanged;
 
   const MainTextFormField({
@@ -80,6 +80,12 @@ class MainTextFormField extends StatelessWidget {
                 style: GoogleFonts.montserrat(),
                 keyboardType: keyboardType,
                 decoration: InputDecoration(
+                  constraints: BoxConstraints(maxHeight: 50),
+                  errorStyle: GoogleFonts.montserrat(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w300,
+                  ),
+                  // errorBorder: ,
                   border: border,
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: contentPaddingHorizontal,
@@ -97,8 +103,8 @@ class MainTextFormField extends StatelessWidget {
                     child: SvgPicture.asset(
                       icon!,
                       color: Colors.grey.withOpacity(0.5),
-                      height: 20.r,
-                      width: 20.r,
+                      height: 18.r,
+                      width: 18.r,
                     ),
                   ),
                   suffixIconConstraints: const BoxConstraints.expand(width: 20, height: 20).r,
