@@ -16,6 +16,7 @@ class AccountRepository {
             fromFirestore: UserModel.fromDocumentSnapshot,
             toFirestore: (UserModel userModel, _) => userModel.toJson(),
           );
+
       final docSnap = await documentSnapshot.get();
       final user = docSnap.data();
       if (user != null) {
