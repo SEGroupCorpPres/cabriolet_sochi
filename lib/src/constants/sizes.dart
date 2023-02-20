@@ -5,7 +5,7 @@ class AppSizes {
   static double mainButtonText = 14.sp;
   static double smsCode = 50.sp;
   static double fieldText =  14.sp;
-  static double productDesc = 12.sp;
+  static double productDesc = 11.sp;
   static double productName = 13.sp;
   static double userName = 18.sp;
   static double label = 17.sp;

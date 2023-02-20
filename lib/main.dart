@@ -6,6 +6,8 @@ import 'package:cabriolet_sochi/src/features/account/bloc/account_bloc.dart';
 import 'package:cabriolet_sochi/src/features/account/domain/repositories/account_repository.dart';
 import 'package:cabriolet_sochi/src/features/authentication/bloc/authentication_cubit.dart';
 import 'package:cabriolet_sochi/src/features/authentication/domain/repositories/authentication_repository.dart';
+import 'package:cabriolet_sochi/src/features/home/bloc/home_bloc.dart';
+import 'package:cabriolet_sochi/src/features/home/domain/repositories/car_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,20 +21,31 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   final uid = prefs.getString('uid');
   final authenticationRepository = AuthenticationRepository();
+  final carRepository = CarRepository();
   final accountRepository = AccountRepository();
   BlocOverrides.runZoned(
     () => runApp(
       MultiBlocProvider(
         providers: [
           BlocProvider<AppBloc>(
-            create: (context) => AppBloc(authenticationRepository)..add(IsAuthenticated()),
+            create: (context) => AppBloc(authenticationRepository)
+              ..add(
+                IsAuthenticated(),
+              ),
           ),
           BlocProvider<AuthenticationCubit>(
             create: (context) => AuthenticationCubit(),
           ),
           BlocProvider<AccountBloc>(
-            create: (context) => AccountBloc(accountRepository: accountRepository),
-          )
+            create: (context) => AccountBloc(
+              accountRepository: accountRepository,
+            ),
+          ),
+          BlocProvider<HomeBloc>(
+            create: (context) => HomeBloc(
+              carRepository: carRepository,
+            ),
+          ),
         ],
         child: App(
           uid: uid,
