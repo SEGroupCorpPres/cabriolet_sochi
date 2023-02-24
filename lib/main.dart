@@ -6,8 +6,11 @@ import 'package:cabriolet_sochi/src/features/account/bloc/account_bloc.dart';
 import 'package:cabriolet_sochi/src/features/account/domain/repositories/account_repository.dart';
 import 'package:cabriolet_sochi/src/features/authentication/bloc/authentication_cubit.dart';
 import 'package:cabriolet_sochi/src/features/authentication/domain/repositories/authentication_repository.dart';
+import 'package:cabriolet_sochi/src/features/cart/bloc/cart_bloc.dart';
+import 'package:cabriolet_sochi/src/features/cart/domain/repositories/cart_repository.dart';
 import 'package:cabriolet_sochi/src/features/home/bloc/home_bloc.dart';
 import 'package:cabriolet_sochi/src/features/home/domain/repositories/car_repository.dart';
+import 'package:cabriolet_sochi/src/features/orders/cubit/orders_cubit.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,9 +23,11 @@ Future<void> main() async {
   );
   final prefs = await SharedPreferences.getInstance();
   final uid = prefs.getString('uid');
+  final isFirstTimeEntry = prefs.getBool('isFirstTimeEntry') ?? true;
   final authenticationRepository = AuthenticationRepository();
   final carRepository = CarRepository();
   final accountRepository = AccountRepository();
+  final cartRepository = CartRepository();
   BlocOverrides.runZoned(
     () => runApp(
       MultiBlocProvider(
@@ -46,9 +51,18 @@ Future<void> main() async {
               carRepository: carRepository,
             ),
           ),
+          BlocProvider<OrdersCubit>(
+            create: (context) => OrdersCubit(),
+          ),
+          BlocProvider<CartBloc>(
+            create: (context) => CartBloc(
+              cartRepository: cartRepository,
+            ),
+          ),
         ],
         child: App(
           uid: uid,
+          isFirstTimeEntry: isFirstTimeEntry,
         ),
       ),
     ),

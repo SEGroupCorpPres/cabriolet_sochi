@@ -12,6 +12,7 @@ part 'app_state.dart';
 class AppBloc extends Bloc<AppEvent, AppState> {
   AppBloc(this._authenticationRepository) : super(UnInitialized()) {
     on<IsAuthenticated>(_handleVerifyUserAuth);
+    on<SignOutEvent>(_signOut);
   }
 
   final AuthenticationRepository _authenticationRepository;
@@ -22,11 +23,16 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   ) async {
     emit(VerifyingAuth());
     final isAuthenticated = await _authenticationRepository.isLoggedIn();
-    // const isAuthenticated = true;
     if (isAuthenticated) {
       emit(Authenticated(UserModel()));
     } else {
       emit(UnAuthenticated());
     }
   }
+  Future<void> _signOut(SignOutEvent event, Emitter<AppState> emit)async{
+    emit(SignOutState());
+    await _authenticationRepository.signOut();
+    emit(UnAuthenticated());
+  }
+
 }

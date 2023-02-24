@@ -9,5 +9,3 @@ abstract class AccountEvent extends Equatable {
 class GetData extends AccountEvent {
   GetData();
 }
-
-class UserSignOutEvent extends AccountEvent {}

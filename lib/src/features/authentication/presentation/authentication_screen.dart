@@ -33,11 +33,12 @@ class AuthenticationScreen extends StatefulWidget {
 
 class _AuthenticationScreenState extends State<AuthenticationScreen> {
   late TextEditingController phoneTextEditingController;
-   TextEditingController phoneText = TextEditingController();
+  TextEditingController phoneText = TextEditingController();
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   late bool isChecked = false;
   final _navigatorKey = GlobalKey<NavigatorState>();
+  late bool isPhoneNumberSent = false;
 
   NavigatorState get _navigator => _navigatorKey.currentState!;
 
@@ -62,48 +63,19 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
     return Scaffold(
       appBar: AppBar(
         title: AppBarTitle(
-          title: 'Вход',
+          title: 'Вход/Регистрация',
           fontWeight: FontWeight.w800,
           color: Colors.black,
           fontSize: AppSizes.cartHistoryProductCost,
         ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Center(
-              child: AppBarTitle(
-                title: 'Регистрация',
-                fontSize: AppSizes.cartHistoryProductCost,
-                color: AppColors.mainColor,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-        ],
       ),
-      body: BlocConsumer<AuthenticationCubit, AuthenticationState>(
+      body: BlocListener<AuthenticationCubit, AuthenticationState>(
         listener: (context, state) {
           // TODO: implement listener}
-          if (state.status == AuthenticationStatus.authInProgress) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Аутентификация...',
-                        style: GoogleFonts.montserrat(),
-                      ),
-                      const CircularProgressIndicator.adaptive()
-                    ],
-                  ),
-                ),
-              );
-          }
-
           if (state.status == AuthenticationStatus.otpSent) {
+            const Center(
+              child: CircularProgressIndicator.adaptive(),
+            );
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
@@ -133,78 +105,10 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
             );
           }
 
-          if (state.status == AuthenticationStatus.otpVerificationSuccess) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.green,
-                  content: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text('OTP успешно подтвержден...'),
-                      Icon(Icons.check),
-                    ],
-                  ),
-                ),
-              );
-            Navigator.of(context).push(
-              Platform.isIOS
-                  ? CupertinoPageRoute<void>(
-                      builder: (_) => const AccountPage(),
-                    )
-                  : MaterialPageRoute<void>(
-                      builder: (_) => const AccountPage(),
-                    ),
-            );
-          }
-
-          if (state.status == AuthenticationStatus.profileUpdateInProgress) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.green,
-                  content: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text('Обновление профиля...'),
-                      CircularProgressIndicator(),
-                    ],
-                  ),
-                ),
-              );
-          }
-
-          if (state.status == AuthenticationStatus.profileUpdateComplete) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.green,
-                  content: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text('Профиль успешно обновлен...'),
-                      Icon(Icons.check),
-                    ],
-                  ),
-                ),
-              );
-            Navigator.of(context).pushReplacement(
-              Platform.isIOS
-                  ? CupertinoPageRoute(
-                      builder: (_) => const AccountPage(),
-                    )
-                  : MaterialPageRoute(
-                      builder: (_) => const AccountPage(),
-                    ),
-            );
-            // Navigator.pushReplacementNamed(context, '/home');
-            // context.read<SignInCubit>().sendOtp();
-          }
-
           if (state.status == AuthenticationStatus.exception) {
+            Future.delayed(Duration.zero, () {
+              isPhoneNumberSent = false;
+            });
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
@@ -212,128 +116,128 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                   backgroundColor: Colors.red,
                   content: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(state.error ?? 'Ошибка аутентификации'),
-                      const Icon(Icons.error),
+                    children: const [
+                      Text('Ошибка аутентификации'),
+                      Icon(Icons.error),
                     ],
                   ),
                 ),
               );
           }
         },
-        builder: (context, state) {
-          return Column(
-            children: [
-              const SizedBox(height: 40),
-              Form(
-                key: formKey,
-                child: Column(
-                  children: [
-                    MainTextFormField(
-                      horizontalPadding: 20,
-                      label: 'Номер телефона',
-                      labelFontSize: AppSizes.mainLabel,
-                      labelColor: AppColors.labelColor,
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
+            Form(
+              key: formKey,
+              child: Column(
+                children: [
+                  MainTextFormField(
+                    horizontalPadding: 20,
+                    label: 'Номер телефона',
+                    labelFontSize: AppSizes.mainLabel,
+                    labelColor: AppColors.labelColor,
                     marginContainer: 10,
-                      width: MediaQuery.of(context).size.width,
-                      bgColor: const Color(0xffEBF7EE),
-                      borderR: 8,
-                      height: 32.h,
-                      keyboardType: TextInputType.number,
-                      border: InputBorder.none,
-                      contentPaddingHorizontal: 20,
-                      textEditingController: phoneTextEditingController,
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Область не может быть пустой';
-                        } else if (value.toString().length - 1 < 11) {
-                          return 'Номер телефона должен состоять из 11 цифр.';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) {},
-                      onChanged: (String? value) async {
-                        context.read<AuthenticationCubit>().phoneNumberChanged(value!);
-                        await SmsAutoFill().getAppSignature;
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      checkColor: AppColors.secondColor,
-                      activeColor: AppColors.mainColor,
-                      focusColor: AppColors.secondColor.withOpacity(0.4),
-                      value: isChecked,
-                      onChanged: (value) {
-                        setState(() {
-                          isChecked = value!;
-                        });
-                      },
-                      splashRadius: 10,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.5),
-                        side: const BorderSide(),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 300,
-                      child: Column(
-                        children: [
-                          Text.rich(
-                            textAlign: TextAlign.start,
-                            softWrap: true,
-                            TextSpan(
-                              text: 'Я согласен с ',
-                              style: GoogleFonts.montserrat(),
-                              children: [
-                                TextSpan(
-                                  text: 'правилами обработки персональных данных',
-                                  style: GoogleFonts.montserrat(color: AppColors.mainColor),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                child: MainButton(
-                  widget: null,
-                  title: 'Далее',
-                  borderWidth: 0,
-                  height: 40.h,
-                  width: MediaQuery.of(context).size.width,
-                  borderColor: Colors.transparent,
-                  titleColor: Colors.white,
-                  bgColor: AppColors.mainColor,
-                  fontSize: AppSizes.mainButtonText,
-                  fontWeight: FontWeight.w400,
-                  onTap: () async {
-                    if (formKey.currentState!.validate()) {
-                      if (isChecked) {
-                        await context.read<AuthenticationCubit>().sendOtp();
+                    width: MediaQuery.of(context).size.width,
+                    bgColor: const Color(0xffEBF7EE),
+                    borderR: 8,
+                    height: 32.h,
+                    keyboardType: TextInputType.number,
+                    border: InputBorder.none,
+                    contentPaddingHorizontal: 20,
+                    textEditingController: phoneTextEditingController,
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Область не может быть пустой';
+                      } else if (value.toString().length - 1 < 7) {
+                        return 'Номер телефона должен состоять из 7 цифр.';
                       }
-                      final preferences = await SharedPreferences.getInstance();
-                      await preferences.setString('phone', phoneTextEditingController.text);
-                    }
-                  },
-                  borderRadius: 10,
-                ),
+                      return null;
+                    },
+                    onSaved: (value) {},
+                    onChanged: (String? value) async {},
+                  ),
+                ],
               ),
-              const SizedBox(height: 50),
-            ],
-          );
-        },
+            ),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+              child: Row(
+                children: [
+                  Checkbox(
+                    checkColor: AppColors.secondColor,
+                    activeColor: AppColors.mainColor,
+                    focusColor: AppColors.secondColor.withOpacity(0.4),
+                    value: isChecked,
+                    onChanged: (value) {
+                      setState(() {
+                        isChecked = value!;
+                      });
+                    },
+                    splashRadius: 10,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.5),
+                      side: const BorderSide(),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 300,
+                    child: Column(
+                      children: [
+                        Text.rich(
+                          textAlign: TextAlign.start,
+                          softWrap: true,
+                          TextSpan(
+                            text: 'Я согласен с ',
+                            style: GoogleFonts.montserrat(),
+                            children: [
+                              TextSpan(
+                                text: 'правилами обработки персональных данных',
+                                style: GoogleFonts.montserrat(color: AppColors.mainColor),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+              child: MainButton(
+                widget: null,
+                title: 'Далее',
+                borderWidth: 0,
+                height: 40.h,
+                width: MediaQuery.of(context).size.width,
+                borderColor: Colors.transparent,
+                titleColor: Colors.white,
+                bgColor: AppColors.mainColor,
+                fontSize: AppSizes.mainButtonText,
+                fontWeight: FontWeight.w400,
+                onTap: () async {
+                  if (formKey.currentState!.validate()) {
+                    if (isChecked) {
+                      context.read<AuthenticationCubit>().phoneNumberChanged(phoneTextEditingController.text);
+                      await context.read<AuthenticationCubit>().sendOtp();
+                      await SmsAutoFill().getAppSignature;
+                      Future.delayed(Duration.zero, () {
+                        isPhoneNumberSent = true;
+                      });
+                    }
+                    final preferences = await SharedPreferences.getInstance();
+                    await preferences.setString('phone', phoneTextEditingController.text);
+                  }
+                },
+                borderRadius: 10,
+              ),
+            ),
+            const SizedBox(height: 50),
+          ],
+        ),
       ),
     );
   }

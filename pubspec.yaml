@@ -69,6 +69,7 @@ dependencies:
   cached_network_image: ^3.2.1
   image_picker: ^0.8.5
   image_cropper: ^2.0.3
+  mask_text_input_formatter: ^2.4.0
 #  camera: ^0.10.2
 
 dev_dependencies:

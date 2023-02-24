@@ -9,21 +9,6 @@ class UserModel {
     this.dateOfBirth,
   });
 
-  // factory City.fromFirestore(
-  //     DocumentSnapshot<Map<String, dynamic>> snapshot,
-  //     SnapshotOptions? options,
-  //     ) {
-  //   final data = snapshot.data();
-  //   return City(
-  //     name: data?['name'],
-  //     state: data?['state'],
-  //     country: data?['country'],
-  //     capital: data?['capital'],
-  //     population: data?['population'],
-  //     regions:
-  //     data?['regions'] is Iterable ? List.from(data?['regions']) : null,
-  //   );
-  // }
   factory UserModel.fromDocumentSnapshot(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
     SnapshotOptions? options,
@@ -35,7 +20,7 @@ class UserModel {
       phoneNumber: data['phoneNumber'].toString(),
       fullName: data['fullName'].toString(),
       imageUrl: data['imageUrl'].toString(),
-      // dateOfBirth: data['dateOfBirth'] as DateTime,
+      dateOfBirth: (data['dateOfBirth'] as Timestamp).toDate(),
     );
   }
 
@@ -48,7 +33,7 @@ class UserModel {
       fullName: data['fullName'] as String,
       phoneNumber: data['phoneNumber'] as String,
       imageUrl: data['imageUrl'] as String,
-      dateOfBirth: data['dateOfBirth'] as DateTime,
+      dateOfBirth: (data['dateOfBirth'] as Timestamp).toDate(),
     );
   }
 
@@ -61,22 +46,4 @@ class UserModel {
       'dateOfBirth': dateOfBirth,
     };
   }
-
-// UserModel copyWith({
-//   bool? isVerified,
-//   String? uid,
-//   String? phoneNumber,
-//   String? displayName,
-//   String? displayImg,
-//   DateTime? dateBirth,
-// }) {
-//   return UserModel(
-//     uid: uid ?? this.uid,
-//     phoneNumber: phoneNumber ?? this.phoneNumber,
-//     displayName: displayName ?? this.displayName,
-//     displayImg: displayImg ?? this.displayImg,
-//     isVerified: isVerified ?? this.isVerified,
-//     dateBirth: dateBirth ?? this.dateBirth,
-//   );
-// }
 }

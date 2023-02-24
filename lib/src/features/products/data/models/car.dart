@@ -37,7 +37,6 @@ class Car {
     dimensions = json['dimensions'] as String;
     rentalPrice = json['rental_price'] as int;
     deposit = json['deposit'] as int;
-    termsOfLease = json['terms_of_lease'] as String;
     package = json['package'] as String;
   }
 

@@ -1,9 +1,8 @@
+import 'package:cabriolet_sochi/src/constants/colors.dart';
+import 'package:cabriolet_sochi/src/constants/sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../constants/colors.dart';
-import '../../constants/sizes.dart';
 
 class AccountMenuButton extends StatelessWidget {
   final String title;
@@ -16,7 +15,7 @@ class AccountMenuButton extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 20.0, top: 10, bottom: 10).r,
+          padding: const EdgeInsets.only( top: 10, bottom: 10).r,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -44,8 +43,7 @@ class AccountMenuButton extends StatelessWidget {
         const Divider(
           color: AppColors.labelColor,
           height: 2,
-          indent: 18,
-          endIndent: 20,
+          // indent: 18,
         ),
       ],
     );

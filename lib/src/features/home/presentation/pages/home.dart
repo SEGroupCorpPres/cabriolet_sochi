@@ -36,9 +36,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  // final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   late List<CarModel> carFilterName = [];
+  late List<String> filterName = [];
+  late String orderName = '';
   late bool isExpanded = true;
+  late bool isSelect = false;
   int? _selectedValueIndex;
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -46,8 +49,20 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    BlocProvider.of<HomeBloc>(context).add(GetData());
+    BlocProvider.of<HomeBloc>(context).add(GetDataEvent());
     print(ScreenUtil().screenHeight);
+  }
+
+  Future<void> _filterValue(List<String> filterValue) async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setStringList('filterValue', filterValue);
+    // print(object)
+  }
+
+  Future<void> _orderValue(String orderValue) async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setString('orderValue', orderValue);
+    // print(object)
   }
 
   @override
@@ -83,14 +98,18 @@ class _HomePageState extends State<HomePage> {
                           onTap: () => Navigator.of(context).push(
                             Platform.isIOS
                                 ? CupertinoPageRoute(
-                                    builder: (_) => const ProductOverview(),
+                                    builder: (_) => ProductOverview(
+                                      index: index,
+                                    ),
                                   )
                                 : MaterialPageRoute(
-                                    builder: (_) => const ProductOverview(),
+                                    builder: (_) => ProductOverview(
+                                      index: index,
+                                    ),
                                   ),
                           ),
                           child: Container(
-                            height: 210.h,
+                            height: 222.h,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15).r,
                               color: AppColors.secondColor,
@@ -120,14 +139,14 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 10.0).r,
+                                  padding: const EdgeInsets.symmetric(vertical: 10).r,
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1).r,
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1).r,
                                         child: Text(
-                                          carModel[index].name!,
+                                          '${carModel[index].name!}  ${carModel[index].model!}',
                                           style: GoogleFonts.montserrat(
                                             fontSize: AppSizes.productName,
                                             fontWeight: FontWeight.w700,
@@ -135,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1).r,
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1).r,
                                         child: Text(
                                           carModel[index].description!,
                                           style: GoogleFonts.montserrat(
@@ -145,7 +164,7 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1).r,
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1).r,
                                         child: Text(
                                           carModel[index].color!,
                                           style: GoogleFonts.montserrat(
@@ -155,7 +174,7 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 2.0).r,
+                                        padding: const EdgeInsets.symmetric(vertical: 2).r,
                                         child: Container(
                                           height: 20.h,
                                           width: 135.w,
@@ -202,7 +221,7 @@ class _HomePageState extends State<HomePage> {
                   Positioned(
                     top: 0,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 17.0).w,
+                      padding: const EdgeInsets.symmetric(horizontal: 17).w,
                       child: _filterButton(),
                     ),
                   ),
@@ -273,7 +292,7 @@ class _HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(right: 8.0).r,
+                    padding: const EdgeInsets.only(right: 8).r,
                     child: SvgPicture.asset(
                       'assets/icons/home_list/settings_line.svg',
                       height: 13.h,
@@ -306,9 +325,15 @@ class _HomePageState extends State<HomePage> {
                   child: ListView.builder(
                     itemCount: carFilterName.length,
                     itemBuilder: (context, index) => GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isSelect = !isSelect;
+                          filterName.add(carFilterName[index].name!);
+                        });
+                      },
                       child: Container(
                         decoration: BoxDecoration(
-                          // color: const Color(0xff626262),
+                          color: isSelect ? const Color(0xff626262) : Colors.transparent,
                           borderRadius: BorderRadius.circular(11).r,
                         ),
                         width: 250.w,
@@ -361,8 +386,9 @@ class _HomePageState extends State<HomePage> {
                     children: <Widget>[
                       GestureDetector(
                         onTap: () {
-                          setState(() {
+                          setState(() async {
                             _selectedValueIndex = 0;
+                            orderName = 'rentalPrice';
                           });
                         },
                         child: Container(
@@ -375,7 +401,6 @@ class _HomePageState extends State<HomePage> {
                           padding: const EdgeInsets.symmetric(horizontal: 10).r,
                           margin: const EdgeInsets.symmetric(vertical: 1).r,
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               SvgPicture.asset(
                                 'assets/icons/home_list/filter/price_tag.svg',
@@ -397,8 +422,9 @@ class _HomePageState extends State<HomePage> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          setState(() {
+                          setState(() async {
                             _selectedValueIndex = 1;
+                            orderName = 'year';
                           });
                         },
                         child: Container(
@@ -411,7 +437,6 @@ class _HomePageState extends State<HomePage> {
                           padding: const EdgeInsets.symmetric(horizontal: 10).r,
                           margin: const EdgeInsets.symmetric(vertical: 1).r,
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               SvgPicture.asset(
                                 'assets/icons/home_list/filter/calendar.svg',
@@ -433,8 +458,9 @@ class _HomePageState extends State<HomePage> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          setState(() {
+                          setState(() async {
                             _selectedValueIndex = 2;
+                            orderName = 'output';
                           });
                         },
                         child: Container(
@@ -468,8 +494,9 @@ class _HomePageState extends State<HomePage> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          setState(() {
+                          setState(() async {
                             _selectedValueIndex = 3;
+                            orderName = 'personCount';
                           });
                         },
                         child: Container(
@@ -503,8 +530,9 @@ class _HomePageState extends State<HomePage> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          setState(() {
+                          setState(() async {
                             _selectedValueIndex = 4;
+                            orderName = 'color';
                           });
                         },
                         child: Container(
@@ -557,8 +585,10 @@ class _HomePageState extends State<HomePage> {
                     fontSize: AppSizes.mainButtonText,
                     fontWeight: FontWeight.w600,
                     onTap: () {
-                      setState(() {
+                      setState(() async {
                         isExpanded = !isExpanded;
+                        await _orderValue(orderName);
+                        await _filterValue(filterName);
                         // _isExpanded();
                       });
                     },

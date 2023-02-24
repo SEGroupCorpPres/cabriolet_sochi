@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cabriolet_sochi/app/bloc/app_bloc.dart';
 import 'package:cabriolet_sochi/src/constants/colors.dart';
 import 'package:cabriolet_sochi/src/constants/sizes.dart';
 import 'package:cabriolet_sochi/src/features/account/bloc/account_bloc.dart';
@@ -8,6 +9,7 @@ import 'package:cabriolet_sochi/src/features/authentication/presentation/authent
 import 'package:cabriolet_sochi/src/features/authentication/presentation/sign_up_screen.dart';
 import 'package:cabriolet_sochi/src/features/cart/presentation/cart_history_page.dart';
 import 'package:cabriolet_sochi/src/features/home/presentation/pages/home.dart';
+import 'package:cabriolet_sochi/src/features/home/presentation/pages/splash.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/account_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/account_menu_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/app_bar_title.dart';
@@ -18,6 +20,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -27,10 +30,23 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
+  late bool isFirstTimeEntry = false;
   late bool isChecked = false;
   Map<String, dynamic> user = {};
   final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
   final AccountRepository accountRepository = AccountRepository();
+  final preferences = SharedPreferences.getInstance();
+
+  Future<void> getIsFirstTimeEntry() async {
+    final preferences = await SharedPreferences.getInstance();
+    isFirstTimeEntry = preferences.getBool('isFirstTimeEntry') ?? false;
+    await preferences.setBool('isFirstTimeEntry', true);
+  }
+
+  Future<void> clearUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('uid', '');
+  }
 
   @override
   void initState() {
@@ -38,6 +54,9 @@ class _AccountPageState extends State<AccountPage> {
     super.initState();
     accountRepository.getUserData();
     BlocProvider.of<AccountBloc>(context).add(GetData());
+    if (isFirstTimeEntry!) {
+      getIsFirstTimeEntry();
+    }
   }
 
   @override
@@ -50,10 +69,10 @@ class _AccountPageState extends State<AccountPage> {
         leading: AccountButton(
           onPressed: () => Navigator.of(context).pushReplacement(
             Platform.isIOS
-                ? CupertinoPageRoute(
+                ? CupertinoPageRoute<void>(
                     builder: (_) => const HomePage(),
                   )
-                : MaterialPageRoute(
+                : MaterialPageRoute<void>(
                     builder: (_) => const HomePage(),
                   ),
           ),
@@ -69,10 +88,10 @@ class _AccountPageState extends State<AccountPage> {
           GestureDetector(
             onTap: () => Navigator.of(context).push(
               Platform.isIOS
-                  ? CupertinoPageRoute(
+                  ? CupertinoPageRoute<void>(
                       builder: (_) => const SignUpScreen(),
                     )
-                  : MaterialPageRoute(
+                  : MaterialPageRoute<void>(
                       builder: (_) => const SignUpScreen(),
                     ),
             ),
@@ -150,74 +169,117 @@ class _AccountPageState extends State<AccountPage> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(top: 10.0).r,
-                        child: AccountMenuButton(
-                          title: 'История заказов',
-                          widget: _menuIconButton(
-                            () => Navigator.of(context).push(
-                              Platform.isIOS
-                                  ? CupertinoPageRoute(
-                                      builder: (_) => const CartHistoryPage(),
-                                    )
-                                  : MaterialPageRoute(
-                                      builder: (_) => const CartHistoryPage(),
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      AccountMenuButton(
-                        title: 'Оплатить заказ',
-                        widget: _menuIconButton(
-                          () => Navigator.of(context).push(
+                        padding: const EdgeInsets.only(top: 10).r,
+                        child: MaterialButton(
+                          onPressed: () => Navigator.of(context).push(
                             Platform.isIOS
-                                ? CupertinoPageRoute(
-                                    builder: (_) => const AuthenticationScreen(),
+                                ? CupertinoPageRoute<void>(
+                                    builder: (_) => const CartHistoryPage(),
                                   )
-                                : MaterialPageRoute(
-                                    builder: (_) => const AuthenticationScreen(),
+                                : MaterialPageRoute<void>(
+                                    builder: (_) => const CartHistoryPage(),
                                   ),
                           ),
-                        ),
-                      ),
-                      AccountMenuButton(
-                        title: 'Правила и условия',
-                        widget: _menuIconButton(() => null),
-                      ),
-                      AccountMenuButton(
-                        title: 'Поддержка',
-                        widget: _menuIconButton(() => null),
-                      ),
-                      AccountMenuButton(
-                        title: 'Уведомления',
-                        widget: Padding(
-                          padding: const EdgeInsets.only(right: 10).r,
-                          child: Switch.adaptive(
-                            value: isChecked,
-                            onChanged: (value) {
-                              setState(() {
-                                isChecked = value;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => context.read<AccountBloc>().add(UserSignOutEvent()),
-                        child: ListTile(
-                          title: Text(
-                            'Выйти из аккаунта',
-                            style: GoogleFonts.montserrat(
-                              color: AppColors.mainColor,
-                              fontSize: AppSizes.mainButtonText,
-                              fontWeight: FontWeight.w400,
+                          child: AccountMenuButton(
+                            title: 'История заказов',
+                            widget: Icon(
+                              Icons.arrow_forward_ios,
+                              size: 18.r,
+                              color: Colors.grey,
                             ),
                           ),
                         ),
+                      ),
+                      MaterialButton(
+                        onPressed: () => Navigator.of(context).push(
+                          Platform.isIOS
+                              ? CupertinoPageRoute<void>(
+                                  builder: (_) => const AuthenticationScreen(),
+                                )
+                              : MaterialPageRoute<void>(
+                                  builder: (_) => const AuthenticationScreen(),
+                                ),
+                        ),
+                        child: AccountMenuButton(
+                          title: 'Оплатить заказ',
+                          widget: Icon(
+                            Icons.arrow_forward_ios,
+                            size: 18.r,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      MaterialButton(
+                        onPressed: () {},
+                        child: AccountMenuButton(
+                          title: 'Правила и условия',
+                          widget: Icon(
+                            Icons.arrow_forward_ios,
+                            size: 18.r,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      MaterialButton(
+                        onPressed: () {},
+                        child: AccountMenuButton(
+                          title: 'Поддержка',
+                          widget: Icon(
+                            Icons.arrow_forward_ios,
+                            size: 18.r,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      MaterialButton(
+                        onPressed: () {},
+                        child: AccountMenuButton(
+                          title: 'Уведомления',
+                          widget: Padding(
+                            padding: const EdgeInsets.only(right: 10).r,
+                            child: Switch.adaptive(
+                              value: isChecked,
+                              onChanged: (value) {
+                                setState(() {
+                                  isChecked = value;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                      BlocBuilder<AppBloc, AppState>(
+                        builder: (context, state) {
+                          return GestureDetector(
+                            onTap: () {
+                              context.read<AppBloc>().add(SignOutEvent());
+                              clearUserId();
+                              Navigator.of(context).pushAndRemoveUntil(
+                                  Platform.isIOS
+                                      ? CupertinoPageRoute<void>(
+                                          builder: (_) => SplashScreen(isFirstTimeEntry: true),
+                                        )
+                                      : MaterialPageRoute<void>(
+                                          builder: (_) => SplashScreen(isFirstTimeEntry: true),
+                                        ),
+                                  (route) => true);
+                            },
+                            child: ListTile(
+                              title: Text(
+                                'Выйти из аккаунта',
+                                style: GoogleFonts.montserrat(
+                                  color: AppColors.mainColor,
+                                  fontSize: AppSizes.mainButtonText,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             );
           } else if (state is UserDataLoading) {
@@ -229,15 +291,15 @@ class _AccountPageState extends State<AccountPage> {
       ),
     );
   }
-
-  Widget _menuIconButton(Function() onPressed) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: Icon(
-        Icons.arrow_forward_ios,
-        size: 18.r,
-        color: Colors.grey,
-      ),
-    );
-  }
+//
+// Widget _menuIconButton(Function() onPressed) {
+//   return IconButton(
+//     onPressed: onPressed,
+//     icon: Icon(
+//       Icons.arrow_forward_ios,
+//       size: 18.r,
+//       color: Colors.grey,
+//     ),
+//   );
+// }
 }

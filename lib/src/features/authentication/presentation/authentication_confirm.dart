@@ -43,14 +43,9 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> with Code
     fontWeight: FontWeight.w800,
   );
   @override
-  void codeUpdated() {
-    setState(() {
-      _code = code!;
-    });
-  }
-  @override
   void initState() {
     countdownController.start();
+    _code = textEditingController.text;
     super.initState();
     setState(() {});
     _timer = Timer.periodic(
@@ -61,6 +56,12 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> with Code
       },
     );
     listenForCode();
+  }
+  @override
+  void codeUpdated() {
+    setState(() {
+      _code = code!;
+    });
   }
 
   Future<void> _getUserID()async{
@@ -73,6 +74,7 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> with Code
     _timer!.cancel();
     super.dispose();
     cancel();
+    unregisterListener();
   }
 
   @override
@@ -106,29 +108,88 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> with Code
           // final prefs = await SharedPreferences.getInstance();
           // uid = prefs.getString('uid');
           _getUserID();
+          if (state.status == AuthenticationStatus.authInProgress) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Аутентификация...',
+                        style: GoogleFonts.montserrat(),
+                      ),
+                      const CircularProgressIndicator.adaptive()
+                    ],
+                  ),
+                ),
+              );
+          }
           if (state.status == AuthenticationStatus.authenticated) {
             if (uid != null && uid!.isNotEmpty) {
               print('user Id: $uid');
               Navigator.of(context).push(
                 Platform.isIOS
                     ? CupertinoPageRoute<void>(
-                        builder: (_) => AccountPage(),
+                        builder: (_) => const AccountPage(),
                       )
                     : MaterialPageRoute<void>(
-                        builder: (_) => AccountPage(),
+                        builder: (_) => const AccountPage(),
                       ),
               );
             } else {
               Navigator.of(context).push(
                 Platform.isIOS
                     ? CupertinoPageRoute<void>(
-                        builder: (_) => SignUpScreen(),
+                        builder: (_) => const SignUpScreen(),
                       )
                     : MaterialPageRoute<void>(
-                        builder: (_) => SignUpScreen(),
+                        builder: (_) => const SignUpScreen(),
                       ),
               );
             }
+          }
+          if (state.status == AuthenticationStatus.otpVerificationSuccess) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.green,
+                  content: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('OTP успешно подтвержден...'),
+                      Icon(Icons.check),
+                    ],
+                  ),
+                ),
+              );
+            Navigator.of(context).push(
+              Platform.isIOS
+                  ? CupertinoPageRoute<void>(
+                builder: (_) => const AccountPage(),
+              )
+                  : MaterialPageRoute<void>(
+                builder: (_) => const AccountPage(),
+              ),
+            );
+          }
+          if (state.status == AuthenticationStatus.exception) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.red,
+                  content: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('Ошибка аутентификации'),
+                      Icon(Icons.error),
+                    ],
+                  ),
+                ),
+              );
           }
         },
         child: Padding(
@@ -154,9 +215,10 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> with Code
                     AppColors.mainColor,
                   ),
                 ),
+                enableInteractiveSelection: false,
                 currentCode: _code,
-                onCodeChanged: (code) {
-                  if (code!.length == 6) {
+                onCodeSubmitted: (code){
+                  if (code.length == 6) {
                     _code = code;
                     countdownController.pause();
                     context.read<AuthenticationCubit>().otpChanged(_code);

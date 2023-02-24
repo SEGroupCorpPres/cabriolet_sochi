@@ -1,5 +1,4 @@
 import 'package:cabriolet_sochi/src/features/account/domain/repositories/account_repository.dart';
-import 'package:cabriolet_sochi/src/features/authentication/data/models/user_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -21,9 +20,6 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         emit(UserDataError(e.toString()));
       }
     });
-    on<UserSignOutEvent>((event, emit) async {
-      emit(UserSignOutState());
-      await accountRepository.signOut();
-    });
+
   }
 }

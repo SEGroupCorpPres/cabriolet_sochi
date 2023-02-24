@@ -10,13 +10,34 @@ import 'package:cabriolet_sochi/src/features/home/presentation/pages/splash.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
   final String? uid;
+  final bool? isFirstTimeEntry;
 
-  const App({super.key, required this.uid});
+  const App({
+    super.key,
+    required this.uid,
+    required this.isFirstTimeEntry,
+  });
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  Future<void> getIsFirstTimeEntry(bool isFirstEntry) async {
+    final prefs = await SharedPreferences.getInstance();
+    // widget.isFirstTimeEntry = prefs.getBool('isFirstTimeEntry');
+    await prefs.setBool('isFirstTimeEntry', isFirstEntry);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,16 +71,20 @@ class App extends StatelessWidget {
       child: BlocBuilder<AppBloc, AppState>(
         builder: (context, state) {
           if (state is Authenticated) {
-            if (uid != null && uid!.isNotEmpty) {
-              print('user Id: $uid');
-              return const AccountPage();
-            } else {
+            if (widget.uid != null && widget.uid!.isNotEmpty) {
+                print('user Id: $widget.uid');
+                return SplashScreen(isFirstTimeEntry: false);
+              }
+            else {
               return const SignUpScreen();
             }
           } else if (state is UnAuthenticated) {
-            return const AuthenticationScreen();
+            // if (isFirstTimeEntry!) {
+            print('user Id: ${widget.uid}');
+            getIsFirstTimeEntry(true);
+            return SplashScreen(isFirstTimeEntry: true,);
           } else {
-            return SplashScreen();
+            return Container();
           }
         },
       ),

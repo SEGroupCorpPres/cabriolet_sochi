@@ -38,4 +38,3 @@ class UserDataLoaded extends AccountState {
   List<Object?> get props => [];
 }
 
-class UserSignOutState extends AccountState {}

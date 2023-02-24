@@ -7,7 +7,7 @@ import '../../constants/colors.dart';
 import '../../constants/sizes.dart';
 
 class LessCarInfo extends StatelessWidget {
-  final String info;
+  final dynamic info;
   final String image;
 
   const LessCarInfo({
@@ -30,7 +30,7 @@ class LessCarInfo extends StatelessWidget {
           child: SizedBox(
             width: 130.w,
             child: Text(
-              info,
+              info.toString(),
               style: GoogleFonts.montserrat(
                 fontSize: AppSizes.productDesc,
                 fontWeight: FontWeight.w400,

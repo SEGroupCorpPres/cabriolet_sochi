@@ -25,3 +25,9 @@ class VerifyingAuth extends AppState {
   @override
   List<Object?> get props => [];
 }
+
+class SignOutState extends AppState {
+  @override
+  // TODO: implement props
+  List<Object?> get props => [];
+}

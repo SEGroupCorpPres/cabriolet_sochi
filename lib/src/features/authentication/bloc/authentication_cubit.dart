@@ -19,13 +19,6 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
       ),
     );
   }
-
-  void countryChanged(Country country) {
-    emit(
-      state.copyWith(country: country),
-    );
-  }
-
   void otpChanged(String otp) {
     emit(state.copyWith(otp: otp));
   }

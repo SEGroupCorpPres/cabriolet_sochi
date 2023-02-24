@@ -36,4 +36,7 @@ class AuthenticationRepository {
   Future<User?> signInWithCredential(AuthCredential credential) => _authenticationProvider.signInWithCredential(credential);
 
   Future<void> saveProfile(UserModel user) => _authenticationProvider.saveProfile(user);
+  Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
+  }
 }

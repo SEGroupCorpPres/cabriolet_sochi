@@ -54,14 +54,14 @@ class CarModel {
       year: data['year'] as int,
       color: data['color'] as String,
       personCount: data['person_count'] as int,
-      engineDescription: data['engine_description'] as String,
+      engineDescription: data['engine_description'] != null ? data['engine_description'] as List<String> : [],
       output: data['output'] as int,
-      fuelDescription: data['fuel_description'] as String,
-      transmissionDescription: data['transmission_description'] as String,
-      dimensions: data['dimensions'] as String,
+      fuelDescription: data['fuel_description'] != null ? data['fuel_description'] as List<String> : [],
+      transmissionDescription: data['transmission_description'] != null ? data['transmission_description'] as List<String> : [],
+      dimensions: data['dimensions'] != null ? data['dimensions'] as List<String> : [],
       rentalPrice: data['rental_price'] as int,
       deposit: data['deposit'] as int,
-      package: data['package:'] as String,
+      package: data['package:'] != null ? data['package'] as List<String> : [],
     );
   }
 
@@ -70,8 +70,7 @@ class CarModel {
   ) {
     return CarModel(
       id: json['id'] as int,
-      images: json['images'] != null ? List<String?>.from(json["images"] as Iterable<dynamic>) : [],
-      // images: <String>[],
+      images: json['images'] != null ? List<String?>.from(json['images'] as Iterable<dynamic>) : [],
       name: json['name'] as String,
       model: json['model'] as String,
       carLogo: json['car_logo'] as String,
@@ -79,14 +78,14 @@ class CarModel {
       year: json['year'] as int,
       color: json['color'] as String,
       personCount: json['person_count'] as int,
-      engineDescription: json['engine_description'] as String,
+      engineDescription: json['engine_description'] != null ? List<String?>.from(json['engineDescription'] as Iterable<dynamic>) : [],
       output: json['output'] as int,
-      fuelDescription: json['fuel_description'] as String,
-      transmissionDescription: json['transmission_description'] as String,
-      dimensions: json['dimensions'] as String,
+      fuelDescription: json['fuel_description'] != null ? List<String?>.from(json['fuelDescription'] as Iterable<dynamic>) : [],
+      transmissionDescription: json['transmission_description'] != null ? List<String?>.from(json['transmissionDescription'] as Iterable<dynamic>) : [],
+      dimensions: json['dimensions'] != null ? List<String?>.from(json['dimensions'] as Iterable<dynamic>) : [],
       rentalPrice: json['rental_price'] as int,
       deposit: json['deposit'] as int,
-      package: json['package'] as String,
+      package: json['package'] != null ? List<String?>.from(json['package'] as Iterable<dynamic>) : [],
     );
   }
 
@@ -99,14 +98,14 @@ class CarModel {
   int? year;
   String? color;
   int? personCount;
-  String? engineDescription;
+  List<String?>? engineDescription;
   int? output;
-  String? fuelDescription;
-  String? transmissionDescription;
-  String? dimensions;
+  List<String?>? fuelDescription;
+  List<String?>? transmissionDescription;
+  List<String?>? dimensions;
   int? rentalPrice;
   int? deposit;
-  String? package;
+  List<String?>? package;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};

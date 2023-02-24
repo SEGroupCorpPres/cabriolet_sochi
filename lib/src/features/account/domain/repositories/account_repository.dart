@@ -25,11 +25,12 @@ class AccountRepository {
           'fullName': user.fullName,
           'imageUrl': user.imageUrl,
           'phoneNumber': user.phoneNumber,
+          'dateOfBirth': user.dateOfBirth
         };
         print(user0);
         return user0;
       } else {
-        print("No such document.");
+        print('No such document.');
         return user0;
       }
     } on FirebaseException catch (e) {
@@ -42,7 +43,5 @@ class AccountRepository {
     }
   }
 
-  Future<void> signOut() async {
-    await FirebaseAuth.instance.signOut();
-  }
+
 }

@@ -49,13 +49,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String? imageUrl;
   bool _isLoading = false;
 
-  Future<void> _userPhoneNumber()async {
+  Future<void> _userPhoneNumber() async {
     final preferences = await SharedPreferences.getInstance();
     _phoneTextEditingController.text += preferences.getString('phone') ?? '+';
     // print(object)
   }
+
   @override
-  void initState(){
+  void initState() {
     // TODO: implement initState
     super.initState();
     _userPhoneNumber();
@@ -69,7 +70,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
       _formKey.currentState!.save();
       try {
-        if(imageFile ==  null){
+        if (imageFile == null) {
           print('Пожалуйста, выберите изображение');
         } else {
           final ref = FirebaseStorage.instance.ref().child('userimages').child(_nameTextEditingController.text + '.jpg');
@@ -86,11 +87,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
           await Navigator.of(context).pushReplacement(
             Platform.isIOS
                 ? CupertinoPageRoute(
-              builder: (_) => const AccountPage(),
-            )
+                    builder: (_) => const AccountPage(),
+                  )
                 : MaterialPageRoute(
-              builder: (_) => const AccountPage(),
-            ),
+                    builder: (_) => const AccountPage(),
+                  ),
           );
         }
       } catch (error) {
@@ -344,6 +345,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
     print(_date);
   }
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -364,170 +366,232 @@ class _SignUpScreenState extends State<SignUpScreen> {
           fontWeight: FontWeight.w800,
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15).r,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Заполните информацию о себе:',
-                style: GoogleFonts.montserrat(
-                  color: Colors.black,
-                  fontSize: AppSizes.mainButtonText,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              Center(
-                child: Container(
-                  width: 100.r,
-                  height: 100.r,
-                  margin: EdgeInsets.symmetric(vertical: 30.r),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(50.r),
-                    child: imageFile == null
-                        ? Image.asset('assets/images/splash/auth_profile_pic.png')
-                        : Image.file(
-                            imageFile!,
-                            fit: BoxFit.cover,
-                            width: 100.r,
-                          ),
-                  ),
-                ),
-              ),
-              MainButton(
-                widget: null,
-                title: 'Загрузить фотографию',
-                borderWidth: 1.5,
-                height: 35.h,
-                width: MediaQuery.of(context).size.width,
-                borderColor: AppColors.mainColor,
-                titleColor: AppColors.mainColor,
-                bgColor: AppColors.secondColor,
-                fontSize: AppSizes.mainButtonText,
-                fontWeight: FontWeight.w400,
-                onTap: () {
-                  Platform.isIOS ? _showCupertinoImageDialog() : _showMaterialImageDialog();
-                },
-                borderRadius: 8,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 30).r,
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      MainTextFormField(
-                        textEditingController: _nameTextEditingController,
-                        horizontalPadding: 0,
-                        label: 'Фамилия, Имя',
-                        labelFontSize: AppSizes.mainLabel,
-                        labelColor: AppColors.labelColor,
-                        marginContainer: 10,
-                        width: MediaQuery.of(context).size.width,
-                        height: 35.h,
-                        bgColor: const Color(0xffFFE0E0),
-                        borderR: 8,
-                        keyboardType: TextInputType.text,
-                        border: InputBorder.none,
-                        contentPaddingHorizontal: 15,
-                        validator: (value) {
-                          return value == null ? 'Фамилия и Имя не должны быть пустыми' : null;
-                        },
-                        onSaved: (value) {},
-                        onChanged: (String? value) {},
-                      ),
-                      MainTextFormField(
-                        textEditingController: _phoneTextEditingController,
-                        horizontalPadding: 0,
-                        label: 'Телефон',
-                        labelFontSize: AppSizes.mainLabel,
-                        labelColor: AppColors.labelColor,
-                        marginContainer: 10,
-                        width: MediaQuery.of(context).size.width,
-                        height: 35.h,
-                        bgColor: const Color(0xffFFE0E0),
-                        borderR: 8,
-                        keyboardType: TextInputType.phone,
-                        border: InputBorder.none,
-                        contentPaddingHorizontal: 15,
-                        validator: (value) {
-                          if (value == null) {
-                            return 'Область не может быть пустой';
-                          } else if (value.toString().length - 1 < 11) {
-                            return 'Номер телефона должен состоять из 11 цифр.';
-                          }
-                          return null;
-                        },
-                        onSaved: (value) {},
-                        onChanged: (String? value) {},
-                      ),
-                      MainTextFormField(
-                        textEditingController: _dateTextEditingController,
-                        horizontalPadding: 0,
-                        label: 'Дата рождения',
-                        labelFontSize: AppSizes.mainLabel,
-                        labelColor: AppColors.labelColor,
-                        marginContainer: 10,
-                        width: MediaQuery.of(context).size.width,
-                        height: 35.h,
-                        bgColor: const Color(0xffFFE0E0),
-                        borderR: 8,
-                        onTap: Platform.isIOS ? _cupertinoDatePicker : _materialDatePicker,
-                        keyboardType: TextInputType.text,
-                        border: InputBorder.none,
-                        contentPaddingHorizontal: 15,
-                        validator: (value) {
-                          return null;
-                        },
-                        onSaved: (value) {
-                          // _date=value as DateTime;
-                          // print(value);
-                        },
-                        onChanged: (String? value) {},
-                      ),
+      body: BlocListener<AuthenticationCubit, AuthenticationState>(
+        listener: (context, state) {
+          // TODO: implement listener}
+          if (state.status == AuthenticationStatus.profileUpdateInProgress) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.green,
+                  content: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('Обновление профиля...'),
+                      CircularProgressIndicator(),
                     ],
                   ),
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Внимание!',
-                    style: GoogleFonts.montserrat(
-                      color: Colors.black,
-                      fontSize: AppSizes.mainButtonText,
-                      fontWeight: FontWeight.w400,
+              );
+          }
+          if (state.status == AuthenticationStatus.profileUpdateComplete) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.green,
+                  content: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('Профиль успешно обновлен...'),
+                      Icon(Icons.check),
+                    ],
+                  ),
+                ),
+              );
+            Navigator.of(context).pushReplacement(
+              Platform.isIOS
+                  ? CupertinoPageRoute<void>(
+                      builder: (_) => const AccountPage(),
+                    )
+                  : MaterialPageRoute<void>(
+                      builder: (_) => const AccountPage(),
+                    ),
+            );
+          }
+          if (state.status == AuthenticationStatus.exception) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  backgroundColor: Colors.red,
+                  content: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('Ошибка аутентификации'),
+                      Icon(Icons.error),
+                    ],
+                  ),
+                ),
+              );
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15).r,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Заполните информацию о себе:',
+                  style: GoogleFonts.montserrat(
+                    color: Colors.black,
+                    fontSize: AppSizes.mainButtonText,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                Center(
+                  child: Container(
+                    width: 100.r,
+                    height: 100.r,
+                    margin: EdgeInsets.symmetric(vertical: 30.r),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(50.r),
+                      child: imageFile == null
+                          ? Image.asset('assets/images/splash/auth_profile_pic.png')
+                          : Image.file(
+                              imageFile!,
+                              fit: BoxFit.cover,
+                              width: 100.r,
+                            ),
                     ),
                   ),
-                  Text(
-                    'Сервис доступен для лиц старше 18 лет.',
-                    style: GoogleFonts.montserrat(
-                      color: Colors.black,
-                      fontSize: AppSizes.mainButtonText,
-                      fontWeight: FontWeight.w400,
+                ),
+                MainButton(
+                  widget: null,
+                  title: 'Загрузить фотографию',
+                  borderWidth: 1.5,
+                  height: 35.h,
+                  width: MediaQuery.of(context).size.width,
+                  borderColor: AppColors.mainColor,
+                  titleColor: AppColors.mainColor,
+                  bgColor: AppColors.secondColor,
+                  fontSize: AppSizes.mainButtonText,
+                  fontWeight: FontWeight.w400,
+                  onTap: () {
+                    Platform.isIOS ? _showCupertinoImageDialog() : _showMaterialImageDialog();
+                  },
+                  borderRadius: 8,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 30).r,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        MainTextFormField(
+                          textEditingController: _nameTextEditingController,
+                          horizontalPadding: 0,
+                          label: 'Фамилия, Имя',
+                          labelFontSize: AppSizes.mainLabel,
+                          labelColor: AppColors.labelColor,
+                          marginContainer: 10,
+                          width: MediaQuery.of(context).size.width,
+                          height: 35.h,
+                          bgColor: const Color(0xffFFE0E0),
+                          borderR: 8,
+                          keyboardType: TextInputType.text,
+                          border: InputBorder.none,
+                          contentPaddingHorizontal: 15,
+                          validator: (value) {
+                            return value == null ? 'Фамилия и Имя не должны быть пустыми' : null;
+                          },
+                          onSaved: (value) {},
+                          onChanged: (String? value) {},
+                        ),
+                        MainTextFormField(
+                          textEditingController: _phoneTextEditingController,
+                          horizontalPadding: 0,
+                          label: 'Телефон',
+                          labelFontSize: AppSizes.mainLabel,
+                          labelColor: AppColors.labelColor,
+                          marginContainer: 10,
+                          width: MediaQuery.of(context).size.width,
+                          height: 35.h,
+                          bgColor: const Color(0xffFFE0E0),
+                          borderR: 8,
+                          keyboardType: TextInputType.phone,
+                          border: InputBorder.none,
+                          contentPaddingHorizontal: 15,
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Область не может быть пустой';
+                            } else if (value.toString().length - 1 < 11) {
+                              return 'Номер телефона должен состоять из 11 цифр.';
+                            }
+                            return null;
+                          },
+                          onSaved: (value) {},
+                          onChanged: (String? value) {},
+                        ),
+                        MainTextFormField(
+                          textEditingController: _dateTextEditingController,
+                          horizontalPadding: 0,
+                          label: 'Дата рождения',
+                          labelFontSize: AppSizes.mainLabel,
+                          labelColor: AppColors.labelColor,
+                          marginContainer: 10,
+                          width: MediaQuery.of(context).size.width,
+                          height: 35.h,
+                          bgColor: const Color(0xffFFE0E0),
+                          borderR: 8,
+                          onTap: Platform.isIOS ? _cupertinoDatePicker : _materialDatePicker,
+                          keyboardType: TextInputType.text,
+                          border: InputBorder.none,
+                          contentPaddingHorizontal: 15,
+                          validator: (value) {
+                            return null;
+                          },
+                          onSaved: (value) {
+                            // _date=value as DateTime;
+                            // print(value);
+                          },
+                          onChanged: (String? value) {},
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-              SizedBox(height: 50.h),
-              MainButton(
-                widget: null,
-                title: 'Сохранить',
-                borderWidth: 0,
-                height: 40.h,
-                width: MediaQuery.of(context).size.width,
-                borderColor: Colors.transparent,
-                titleColor: Colors.white,
-                bgColor: AppColors.mainColor,
-                fontSize: AppSizes.mainButtonText,
-                fontWeight: FontWeight.w400,
-                onTap: _saveUserDataToFirebaseFirestore,
-                borderRadius: 8,
-              ),
-              const SizedBox(height: 50),
-            ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Внимание!',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.black,
+                        fontSize: AppSizes.mainButtonText,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Text(
+                      'Сервис доступен для лиц старше 18 лет.',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.black,
+                        fontSize: AppSizes.mainButtonText,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 50.h),
+                MainButton(
+                  widget: null,
+                  title: 'Сохранить',
+                  borderWidth: 0,
+                  height: 40.h,
+                  width: MediaQuery.of(context).size.width,
+                  borderColor: Colors.transparent,
+                  titleColor: Colors.white,
+                  bgColor: AppColors.mainColor,
+                  fontSize: AppSizes.mainButtonText,
+                  fontWeight: FontWeight.w400,
+                  onTap: _saveUserDataToFirebaseFirestore,
+                  borderRadius: 8,
+                ),
+                const SizedBox(height: 50),
+              ],
+            ),
           ),
         ),
       ),
