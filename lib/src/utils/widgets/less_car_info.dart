@@ -8,38 +8,24 @@ import '../../constants/sizes.dart';
 
 class LessCarInfo extends StatelessWidget {
   final dynamic info;
-  final String image;
 
   const LessCarInfo({
     super.key,
     required this.info,
-    required this.image,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        SvgPicture.asset(
-          'assets/icons/car_info/$image.svg',
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5.0).r,
+      child: Text(
+        info.toString(),
+        style: GoogleFonts.montserrat(
+          fontSize: AppSizes.productDesc,
+          fontWeight: FontWeight.w400,
+          color: AppColors.textColor,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5.0).r,
-          child: SizedBox(
-            width: 130.w,
-            child: Text(
-              info.toString(),
-              style: GoogleFonts.montserrat(
-                fontSize: AppSizes.productDesc,
-                fontWeight: FontWeight.w400,
-                color: AppColors.textColor,
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -21,6 +21,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -36,6 +37,9 @@ class _AccountPageState extends State<AccountPage> {
   final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
   final AccountRepository accountRepository = AccountRepository();
   final preferences = SharedPreferences.getInstance();
+  final Uri _url = Uri.parse('https://cabrioletsochi.ru/usloviya-i-tseny.html');
+  final Uri _paymentUrl = Uri.parse('https://cabrioletsochi.ru/oplata-cabrio-online.html');
+  final Uri _contactUrl = Uri.parse('https://cabrioletsochi.ru/kontakty.html');
 
   Future<void> getIsFirstTimeEntry() async {
     final preferences = await SharedPreferences.getInstance();
@@ -191,15 +195,7 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                       ),
                       MaterialButton(
-                        onPressed: () => Navigator.of(context).push(
-                          Platform.isIOS
-                              ? CupertinoPageRoute<void>(
-                                  builder: (_) => const AuthenticationScreen(),
-                                )
-                              : MaterialPageRoute<void>(
-                                  builder: (_) => const AuthenticationScreen(),
-                                ),
-                        ),
+                        onPressed: () async => launchUrl(_paymentUrl),
                         child: AccountMenuButton(
                           title: 'Оплатить заказ',
                           widget: Icon(
@@ -210,7 +206,7 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                       ),
                       MaterialButton(
-                        onPressed: () {},
+                        onPressed: () async => launchUrl(_url),
                         child: AccountMenuButton(
                           title: 'Правила и условия',
                           widget: Icon(
@@ -221,7 +217,7 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                       ),
                       MaterialButton(
-                        onPressed: () {},
+                        onPressed: () async => launchUrl(_contactUrl),
                         child: AccountMenuButton(
                           title: 'Поддержка',
                           widget: Icon(
@@ -291,15 +287,4 @@ class _AccountPageState extends State<AccountPage> {
       ),
     );
   }
-//
-// Widget _menuIconButton(Function() onPressed) {
-//   return IconButton(
-//     onPressed: onPressed,
-//     icon: Icon(
-//       Icons.arrow_forward_ios,
-//       size: 18.r,
-//       color: Colors.grey,
-//     ),
-//   );
-// }
 }

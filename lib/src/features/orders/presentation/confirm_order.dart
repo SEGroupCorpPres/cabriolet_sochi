@@ -332,7 +332,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                   } else if (state is CarDataLoaded) {
                     final carModel = state.carData;
                     rentalPrice = carModel[carId!].rentalPrice!;
-                    carName = carModel[carId!].name;
+                    carName = '${carModel[carId!].name} ${carModel[carId!].description}';
                     return ListTile(
                       leading: Container(
                         width: 70.r,
