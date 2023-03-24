@@ -49,7 +49,9 @@ Future<void> main() async {
           BlocProvider<HomeBloc>(
             create: (context) => HomeBloc(
               carRepository: carRepository,
-            ),
+            )
+              ..add(LoadFilter())
+              ..add(LoadFilterButtonHeight()),
           ),
           BlocProvider<OrdersCubit>(
             create: (context) => OrdersCubit(),

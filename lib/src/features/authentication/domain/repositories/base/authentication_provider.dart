@@ -19,6 +19,7 @@ class AuthenticationProvider extends BaseAuthenticationProvider {
     required PhoneVerificationCompleted phoneVerificationCompleted,
     required PhoneVerificationFailed phoneVerificationFailed,
     required PhoneCodeSent phoneCodeSent,
+    required int timeOutOtp,
     required PhoneCodeAutoRetrievalTimeout autoRetrievalTimeout,
     int? forceResendToken,
   }) {
@@ -28,6 +29,7 @@ class AuthenticationProvider extends BaseAuthenticationProvider {
       verificationFailed: phoneVerificationFailed,
       codeSent: phoneCodeSent,
       codeAutoRetrievalTimeout: autoRetrievalTimeout,
+      timeout: Duration(seconds: timeOutOtp),
       forceResendingToken: forceResendToken,
     );
   }

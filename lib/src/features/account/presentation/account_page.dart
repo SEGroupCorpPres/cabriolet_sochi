@@ -5,7 +5,6 @@ import 'package:cabriolet_sochi/src/constants/colors.dart';
 import 'package:cabriolet_sochi/src/constants/sizes.dart';
 import 'package:cabriolet_sochi/src/features/account/bloc/account_bloc.dart';
 import 'package:cabriolet_sochi/src/features/account/domain/repositories/account_repository.dart';
-import 'package:cabriolet_sochi/src/features/authentication/presentation/authentication_screen.dart';
 import 'package:cabriolet_sochi/src/features/authentication/presentation/sign_up_screen.dart';
 import 'package:cabriolet_sochi/src/features/cart/presentation/cart_history_page.dart';
 import 'package:cabriolet_sochi/src/features/home/presentation/pages/home.dart';
@@ -35,7 +34,6 @@ class _AccountPageState extends State<AccountPage> {
   late bool isChecked = false;
   Map<String, dynamic> user = {};
   final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
-  final AccountRepository accountRepository = AccountRepository();
   final preferences = SharedPreferences.getInstance();
   final Uri _url = Uri.parse('https://cabrioletsochi.ru/usloviya-i-tseny.html');
   final Uri _paymentUrl = Uri.parse('https://cabrioletsochi.ru/oplata-cabrio-online.html');
@@ -56,16 +54,14 @@ class _AccountPageState extends State<AccountPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    accountRepository.getUserData();
     BlocProvider.of<AccountBloc>(context).add(GetData());
-    if (isFirstTimeEntry!) {
+    if (isFirstTimeEntry) {
       getIsFirstTimeEntry();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print('Account Repository: ${accountRepository.getUserData()}');
     final scaffoldState = GlobalKey<ScaffoldState>();
     return Scaffold(
       key: scaffoldState,

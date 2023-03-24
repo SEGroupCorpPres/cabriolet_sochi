@@ -7,6 +7,8 @@ class UserModel {
     this.phoneNumber,
     this.imageUrl,
     this.dateOfBirth,
+    this.email,
+    this.password,
   });
 
   factory UserModel.fromDocumentSnapshot(
@@ -20,11 +22,13 @@ class UserModel {
       phoneNumber: data['phoneNumber'].toString(),
       fullName: data['fullName'].toString(),
       imageUrl: data['imageUrl'].toString(),
+      email: data['email'].toString(),
+      password: data['password'].toString(),
       dateOfBirth: (data['dateOfBirth'] as Timestamp).toDate(),
     );
   }
 
-  final String? id, fullName, phoneNumber, imageUrl;
+  final String? id, fullName, phoneNumber, imageUrl, email, password;
   final DateTime? dateOfBirth;
 
   factory UserModel.fromJson(Map<String, dynamic> data) {
@@ -33,6 +37,8 @@ class UserModel {
       fullName: data['fullName'] as String,
       phoneNumber: data['phoneNumber'] as String,
       imageUrl: data['imageUrl'] as String,
+      email: data['email'] as String,
+      password: data['password'] as String,
       dateOfBirth: (data['dateOfBirth'] as Timestamp).toDate(),
     );
   }
@@ -43,6 +49,8 @@ class UserModel {
       'fullName': fullName,
       'phoneNumber': phoneNumber,
       'imageUrl': imageUrl,
+      'email': email,
+      'password': password,
       'dateOfBirth': dateOfBirth,
     };
   }

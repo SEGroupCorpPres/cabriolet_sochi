@@ -1,57 +1,10 @@
-// part of 'authentication_bloc.dart';
 part of 'authentication_cubit.dart';
-
-// abstract class AuthenticationState extends Equatable {
-//   const AuthenticationState();
-//
-//   @override
-//   List<Object?> get props => [];
-// }
-//
-// class AuthenticationInitial extends AuthenticationState {
-//   @override
-//   List<Object?> get props => [];
-// }
-//
-// class AuthenticationSuccess extends AuthenticationState {
-//   final String? phoneNumber;
-//
-//   const AuthenticationSuccess({
-//     this.phoneNumber,
-//   });
-//
-//   @override
-//   List<Object?> get props => [phoneNumber];
-// }
-//
-// class AuthenticationLoading extends AuthenticationState {
-//   @override
-//   // TODO: implement props
-//   List<Object?> get props => [];
-// }
-//
-// class AuthenticationFailure extends AuthenticationState {
-//   AuthenticationFailure({required this.error});
-//
-//   final String error;
-//   @override
-//   List<Object?> get props => [error];
-// }
-//
-// class PhoneAuthCodeSentSuccess extends AuthenticationState {
-//   final String? verificationId;
-//
-//   PhoneAuthCodeSentSuccess({this.verificationId});
-//
-//   @override
-//   // TODO: implement props
-//   List<Object?> get props => [verificationId];
-// }
 
 enum AuthenticationStatus {
   initial,
   authInProgress,
   otpSent,
+  isWaitingOtp,
   pendingOtpVerification,
   otpVerificationSuccess,
   otpVerificationFailure,
@@ -72,10 +25,12 @@ class AuthenticationState extends Equatable {
     this.userModel,
     this.country,
     this.otp,
+    this.isWaiting,
   });
 
   final AuthenticationStatus? status;
   final String? error, phoneNumber, verificationId, otp;
+  final bool? isWaiting;
   final int? forceResendToken;
   final UserModel? userModel;
   final Country? country;
@@ -89,6 +44,7 @@ class AuthenticationState extends Equatable {
     UserModel? userModel,
     Country? country,
     String? otp,
+    bool? isWaiting,
   }) {
     return AuthenticationState(
       status: status ?? this.status,
@@ -99,6 +55,7 @@ class AuthenticationState extends Equatable {
       userModel: userModel ?? this.userModel,
       country: country ?? this.country,
       otp: otp ?? this.otp,
+      isWaiting: isWaiting ?? this.isWaiting,
     );
   }
 
@@ -112,5 +69,6 @@ class AuthenticationState extends Equatable {
         userModel,
         country,
         otp,
+        isWaiting,
       ];
 }

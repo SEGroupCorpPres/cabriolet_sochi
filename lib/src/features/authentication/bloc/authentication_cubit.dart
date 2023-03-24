@@ -19,6 +19,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
       ),
     );
   }
+
   void otpChanged(String otp) {
     emit(state.copyWith(otp: otp));
   }
@@ -49,7 +50,6 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
       ));
     }
   }
-
   Future<void> sendOtp() async {
     final phoneNumber = state.phoneNumber!;
     print(phoneNumber);
@@ -59,7 +59,10 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
       phoneVerificationFailed: phoneVerificationFailed,
       phoneCodeSent: phoneCodeSent,
       autoRetrievalTimeout: autoRetrievalTimeout,
+      timeOutOtp: 120
     );
+    emit(state.copyWith(isWaiting: true));
+    emit(state.copyWith(status: AuthenticationStatus.isWaitingOtp));
   }
 
   Future<void> phoneVerificationCompleted(AuthCredential credential) async {
@@ -94,6 +97,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
         verificationId: verificationId,
         forceResendToken: forceResendToken,
         status: AuthenticationStatus.otpSent,
+        isWaiting: false,
       ),
     );
   }

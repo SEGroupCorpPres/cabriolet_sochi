@@ -16,13 +16,13 @@ class Assets {
   static const String dataRecommended = 'assets/data/recommended.json';
   static const String filterCalendar = 'assets/icons/home_list/filter/calendar.svg';
   static const String filterCarEngine = 'assets/icons/home_list/filter/car_engine.svg';
+  static const String filterLogo0 = 'assets/icons/home_list/filter/logo0.png';
   static const String filterLogo1 = 'assets/icons/home_list/filter/logo1.png';
   static const String filterLogo2 = 'assets/icons/home_list/filter/logo2.png';
   static const String filterLogo3 = 'assets/icons/home_list/filter/logo3.png';
   static const String filterLogo4 = 'assets/icons/home_list/filter/logo4.png';
   static const String filterLogo5 = 'assets/icons/home_list/filter/logo5.png';
   static const String filterLogo6 = 'assets/icons/home_list/filter/logo6.png';
-  static const String filterLogo7 = 'assets/icons/home_list/filter/logo7.png';
   static const String filterPeople = 'assets/icons/home_list/filter/people.svg';
   static const String filterPriceTag = 'assets/icons/home_list/filter/price_tag.svg';
   static const String filterSprayPaint = 'assets/icons/home_list/filter/spray_paint.svg';
@@ -35,6 +35,8 @@ class Assets {
   static const String payCalendar = 'assets/icons/pay/calendar.svg';
   static const String payTimer = 'assets/icons/pay/timer.svg';
   static const String profileEdit = 'assets/icons/profile/edit.svg';
+  static const String profileEye = 'assets/icons/profile/eye.svg';
+  static const String profileEyeOff = 'assets/icons/profile/eye_off.svg';
   static const String profileSulaymon = 'assets/images/profile/sulaymon.png';
   static const String splashAuthProfilePic = 'assets/images/splash/auth_profile_pic.png';
   static const String splashBackground = 'assets/images/splash/background.png';

@@ -147,137 +147,154 @@ class _ProductOverviewState extends State<ProductOverview> {
                           child: SizedBox(
                             height: 200.h,
                             width: double.infinity,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            child: Wrap(
+                              alignment: WrapAlignment.spaceAround,
+                              // mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Flexible(
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          SvgPicture.asset(
-                                            'assets/icons/car_info/calendar.svg',
-                                          ),
-                                          LessCarInfo(
-                                            info: carModel[index!].description,
-                                          ),
-                                        ],
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: 10.h),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Flexible(
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            SvgPicture.asset(
+                                              'assets/icons/car_info/calendar.svg',
+                                            ),
+                                            SizedBox(
+                                              width: 135.w,
+                                              child: LessCarInfo(
+                                                info: carModel[index!].description,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    Flexible(
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          SvgPicture.asset(
-                                            'assets/icons/car_info/people.svg',
-                                          ),
-                                          LessCarInfo(
-                                            info: '${carModel[index!].personCount} места',
-                                          ),
-                                        ],
+                                      Flexible(
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            SvgPicture.asset(
+                                              'assets/icons/car_info/people.svg',
+                                            ),
+                                            LessCarInfo(
+                                              info: '${carModel[index!].personCount} места',
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Flexible(
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          SvgPicture.asset(
-                                            'assets/icons/car_info/car_engine.svg',
-                                          ),
-                                          SizedBox(
-                                            width: 130.w,
-                                            child: ListView.builder(
-                                              shrinkWrap: true,
-                                              itemCount: carModel[index!].engineDescription!.length,
-                                              itemBuilder: (context, item) {
-                                                return LessCarInfo(
-                                                  info: carModel[index!].engineDescription![item]!,
-                                                );
-                                              },
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: 10.h),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Flexible(
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            SvgPicture.asset(
+                                              'assets/icons/car_info/car_engine.svg',
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Flexible(
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          SvgPicture.asset(
-                                            'assets/icons/car_info/gas.svg',
-                                          ),
-                                          SizedBox(
-                                            width: 130.w,
-                                            child: ListView.builder(
-                                              shrinkWrap: true,
-                                              itemCount: carModel[index!].fuelDescription!.length,
-                                              itemBuilder: (context, item) {
-                                                return LessCarInfo(
-                                                  info: carModel[index!].fuelDescription![item]!,
-                                                );
-                                              },
+                                            SizedBox(
+                                              width: 130.w,
+                                              child: ListView.builder(
+                                                physics: NeverScrollableScrollPhysics(),
+                                                shrinkWrap: true,
+                                                itemCount: carModel[index!].engineDescription!.length,
+                                                itemBuilder: (context, item) {
+                                                  return LessCarInfo(
+                                                    info: carModel[index!].engineDescription![item]!,
+                                                  );
+                                                },
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                      Flexible(
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            SvgPicture.asset(
+                                              'assets/icons/car_info/gas.svg',
+                                            ),
+                                            SizedBox(
+                                              width: 130.w,
+                                              child: ListView.builder(
+                                                physics: NeverScrollableScrollPhysics(),
+                                                shrinkWrap: true,
+                                                itemCount: carModel[index!].fuelDescription!.length,
+                                                itemBuilder: (context, item) {
+                                                  return LessCarInfo(
+                                                    info: carModel[index!].fuelDescription![item]!,
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Flexible(
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          SvgPicture.asset(
-                                            'assets/icons/car_info/gear_shift.svg',
-                                          ),
-                                          SizedBox(
-                                            width: 130.w,
-                                            child: ListView.builder(
-                                              shrinkWrap: true,
-                                              itemCount: carModel[index!].transmissionDescription!.length,
-                                              itemBuilder: (context, item) {
-                                                return LessCarInfo(
-                                                  info: carModel[index!].transmissionDescription![item]!,
-                                                );
-                                              },
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: 10.h),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Flexible(
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            SvgPicture.asset(
+                                              'assets/icons/car_info/gear_shift.svg',
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Flexible(
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          SvgPicture.asset(
-                                            'assets/icons/car_info/maximize.svg',
-                                          ),
-                                          SizedBox(
-                                            width: 130.w,
-                                            child: ListView.builder(
-                                              shrinkWrap: true,
-                                              itemCount: carModel[index!].dimensions!.length,
-                                              itemBuilder: (context, item) {
-                                                return LessCarInfo(
-                                                  info: carModel[index!].dimensions![item]!,
-                                                );
-                                              },
+                                            SizedBox(
+                                              width: 130.w,
+                                              child: ListView.builder(
+                                                physics: NeverScrollableScrollPhysics(),
+                                                shrinkWrap: true,
+                                                itemCount: carModel[index!].transmissionDescription!.length,
+                                                itemBuilder: (context, item) {
+                                                  return LessCarInfo(
+                                                    info: carModel[index!].transmissionDescription![item]!,
+                                                  );
+                                                },
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                      Flexible(
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            SvgPicture.asset(
+                                              'assets/icons/car_info/maximize.svg',
+                                            ),
+                                            SizedBox(
+                                              width: 130.w,
+                                              child: ListView.builder(
+                                                physics: NeverScrollableScrollPhysics(),
+                                                shrinkWrap: true,
+                                                itemCount: carModel[index!].dimensions!.length,
+                                                itemBuilder: (context, item) {
+                                                  return LessCarInfo(
+                                                    info: carModel[index!].dimensions![item]!,
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
@@ -291,6 +308,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                     padding: const EdgeInsets.all(13).r,
                     height: 170.h,
                     width: ScreenUtil().screenWidth,
+                    // constraints: BoxConstraints.expand(),
                     decoration: BoxDecoration(
                       color: AppColors.mainColor,
                       borderRadius: BorderRadius.only(
@@ -298,8 +316,8 @@ class _ProductOverviewState extends State<ProductOverview> {
                         bottomRight: const Radius.circular(10).r,
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.start,
                       children: [
                         Text(
                           '${carModel[index!].rentalPrice!} ₽ в сутки',
@@ -319,7 +337,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                               child: SizedBox(
                                 width: 130.w,
                                 child: Text(
-                                  'Залог ${carModel[index!].deposit} ₽',
+                                  'Залог ${carModel[index!].deposite} ₽',
                                   style: GoogleFonts.montserrat(
                                     fontSize: AppSizes.fieldText,
                                     fontWeight: FontWeight.w400,
@@ -338,6 +356,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                             color: Colors.white,
                           ),
                         ),
+                        SizedBox(height: 20.h),
                       ],
                     ),
                   ),
@@ -417,6 +436,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                           ),
                         ),
                         ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                           itemCount: carModel[index!].package!.length,
                           itemBuilder: (BuildContext context, int item) {
@@ -447,8 +467,9 @@ class _ProductOverviewState extends State<ProductOverview> {
                   Container(
                     width: ScreenUtil().screenWidth,
                     padding: const EdgeInsets.only(bottom: 30, right: 20, left: 20).r,
-                    height: 295.h,
+                    height: 329.h,
                     child: ListView.builder(
+                      shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
                       itemCount: carModel.length,
                       itemBuilder: (BuildContext context, int carIndex) {
@@ -467,8 +488,9 @@ class _ProductOverviewState extends State<ProductOverview> {
                                   ),
                           ),
                           child: Container(
+                            // constraints: const BoxConstraints.expand(),
                             margin: const EdgeInsets.only(right: 10, bottom: 40, left: 20).r,
-                            height: 270.h,
+                            height: 280.h,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15).r,
                               color: AppColors.secondColor,
@@ -483,10 +505,11 @@ class _ProductOverviewState extends State<ProductOverview> {
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              // direction: Axis.vertical,
                               children: [
                                 Container(
-                                  width: ScreenUtil().screenWidth * 0.4,
-                                  height: 112.h,
+                                  width: ScreenUtil().screenWidth * 0.48,
+                                  height: 100.h,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15).r,
                                     image: DecorationImage(
@@ -514,11 +537,15 @@ class _ProductOverviewState extends State<ProductOverview> {
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1).r,
-                                        child: Text(
-                                          carModel[carIndex].description!,
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: AppSizes.productName,
-                                            fontWeight: FontWeight.w400,
+                                        child: SizedBox(
+                                          width: 156.w,
+                                          child: Text(
+                                            carModel[carIndex].description!,
+                                            softWrap: true,
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: AppSizes.productName,
+                                              fontWeight: FontWeight.w400,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -535,8 +562,8 @@ class _ProductOverviewState extends State<ProductOverview> {
                                       Padding(
                                         padding: const EdgeInsets.symmetric(vertical: 2).r,
                                         child: Container(
-                                          height: 25,
-                                          width: 150,
+                                          height: 25.h,
+                                          width: 150.w,
                                           decoration: const BoxDecoration(
                                             color: AppColors.mainColor,
                                             borderRadius: BorderRadius.only(
@@ -559,7 +586,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                                       Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1).r,
                                         child: Text(
-                                          'залог ${carModel[carIndex].deposit} ₽',
+                                          'залог ${carModel[carIndex].deposite} ₽',
                                           style: GoogleFonts.montserrat(
                                             fontSize: AppSizes.productName,
                                             fontWeight: FontWeight.w400,

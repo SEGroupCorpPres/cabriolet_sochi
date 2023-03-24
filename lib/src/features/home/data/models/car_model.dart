@@ -36,7 +36,7 @@ class CarModel {
     this.transmissionDescription,
     this.dimensions,
     this.rentalPrice,
-    this.deposit,
+    this.deposite,
     this.package,
   });
 
@@ -60,7 +60,7 @@ class CarModel {
       transmissionDescription: data['transmission_description'] != null ? data['transmission_description'] as List<String> : [],
       dimensions: data['dimensions'] != null ? data['dimensions'] as List<String> : [],
       rentalPrice: data['rental_price'] as int,
-      deposit: data['deposit'] as int,
+      deposite: data['deposite'] as int,
       package: data['package:'] != null ? data['package'] as List<String> : [],
     );
   }
@@ -69,22 +69,22 @@ class CarModel {
     Map<String, dynamic> json,
   ) {
     return CarModel(
-      id: json['id'] as int,
+      id: int.tryParse(json['id'].toString()),
       images: json['images'] != null ? List<String?>.from(json['images'] as Iterable<dynamic>) : [],
       name: json['name'] as String,
       model: json['model'] as String,
       carLogo: json['car_logo'] as String,
       description: json['description'] as String,
-      year: json['year'] as int,
+      year: int.tryParse(json['year'].toString().replaceAll(' ', '')),
       color: json['color'] as String,
-      personCount: json['person_count'] as int,
+      personCount: int.tryParse(json['person_count'].toString().contains(' ') ? json['person_count'].toString().replaceAll(' ', '') : json['person_count'].toString()),
       engineDescription: json['engine_description'] != null ? List<String?>.from(json['engine_description'] as Iterable<dynamic>) : [],
-      output: json['output'] as int,
+      output: int.tryParse(json['output'].toString()),
       fuelDescription: json['fuel_description'] != null ? List<String?>.from(json['fuel_description'] as Iterable<dynamic>) : [],
       transmissionDescription: json['transmission_description'] != null ? List<String?>.from(json['transmission_description'] as Iterable<dynamic>) : [],
       dimensions: json['dimensions'] != null ? List<String?>.from(json['dimensions'] as Iterable<dynamic>) : [],
-      rentalPrice: json['rental_price'] as int,
-      deposit: json['deposit'] as int,
+      rentalPrice: int.tryParse(json['rental_price'].toString().contains(' ') ? json['rental_price'].toString().replaceAll(' ', '') : json['rental_price'].toString()),
+      deposite: int.tryParse(json['deposite'].toString().contains(' ') ? json['deposite'].toString().replaceAll(' ', '') : json['deposite'].toString()),
       package: json['package'] != null ? List<String?>.from(json['package'] as Iterable<dynamic>) : [],
     );
   }
@@ -104,7 +104,7 @@ class CarModel {
   List<String?>? transmissionDescription;
   List<String?>? dimensions;
   int? rentalPrice;
-  int? deposit;
+  int? deposite;
   List<String?>? package;
 
   Map<String, dynamic> toJson() {
@@ -124,7 +124,7 @@ class CarModel {
     map['transmission_description'] = transmissionDescription;
     map['dimensions'] = dimensions;
     map['rental_price'] = rentalPrice;
-    map['deposit'] = deposit;
+    map['deposite'] = deposite;
     map['package'] = package;
     return map;
   }

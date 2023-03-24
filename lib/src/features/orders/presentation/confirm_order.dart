@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cabriolet_sochi/src/constants/colors.dart';
 import 'package:cabriolet_sochi/src/constants/sizes.dart';
+import 'package:cabriolet_sochi/src/features/account/bloc/account_bloc.dart';
 import 'package:cabriolet_sochi/src/features/account/presentation/account_page.dart';
 import 'package:cabriolet_sochi/src/features/checkout/presentation/successful_checkout.dart';
 import 'package:cabriolet_sochi/src/features/home/bloc/home_bloc.dart';
@@ -17,20 +18,25 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 
 /// ConfirmOrderScreen
 class ConfirmOrderPage extends StatefulWidget {
-  /// Selected car id;
-  final int? carId;
-
+  /// constructor for Confirm Order Screen
   const ConfirmOrderPage({
     super.key,
     required this.carId,
   });
+
+  /// Selected car id;
+  final int? carId;
 
   @override
   State<ConfirmOrderPage> createState() => _ConfirmOrderPageState();
@@ -46,7 +52,10 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
   TextEditingController date2TextEditingController = TextEditingController();
   TextEditingController time1TextEditingController = TextEditingController();
   TextEditingController time2TextEditingController = TextEditingController();
+  bool useTempDirectory = true;
+  List<String> attachment = <String>[];
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  Map<String, dynamic>? userModel = {};
   int orderId = 0;
   DateTime _date = DateTime.now();
   TimeOfDay _time = TimeOfDay.now();
@@ -64,6 +73,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
     // ignore: flutter_style_todos
     // TODO: implement initState
     super.initState();
+    BlocProvider.of<AccountBloc>(context).add(GetData());
     carId = widget.carId;
   }
 
@@ -81,7 +91,11 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
     return rentalPrice * daysBetween(date1, date2);
   }
 
-  Future<void> _saveUserDataToFirebaseFirestore(int price, String carName) async {
+  Future<void> _saveUserDataToFirebaseFirestore(
+    int price,
+    String carName,
+    Map<String, dynamic>? userModel,
+  ) async {
     final isValid = _formKey.currentState!.validate();
     if (isValid) {
       setState(() {});
@@ -90,7 +104,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
         final orderModel = OrderModel(
           id: orderId,
           carId: carId,
-          userId: _firebaseAuth.currentUser!.uid,
+          userId: _firebaseAuth.currentUser!.uid ?? '',
           carName: carName,
           rentalPrice: price,
           fillingAddress: address1TextEditingController.text,
@@ -110,6 +124,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
             time2[1],
           ),
         );
+
         await context.read<OrdersCubit>().saveOrderData(orderModel, orderId.toString());
       } catch (error) {
         if (kDebugMode) {
@@ -118,6 +133,97 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
       } finally {
         setState(() {});
       }
+    }
+  }
+
+  Future<void> _createOrderExcel({
+    required String? uid,
+    required String? userImg,
+    required String? fullName,
+    required String? phoneNumber,
+    required String? dateOfBirth,
+    required double orderId,
+    required double carId,
+    required String carName,
+    required double rentalPrice,
+    required String rentalStartDate,
+    required String rentalEndDate,
+    required String orderCreatedTime,
+    required String fillingAddress,
+    required String returnAddress,
+  }) async {
+    final workbook = xlsio.Workbook();
+    final workSheet = workbook.worksheets[0];
+    workSheet.getRangeByName('B3').setText('Key');
+    workSheet.getRangeByName('B4').setText('uid');
+    workSheet.getRangeByName('B5').setText('user_img');
+    workSheet.getRangeByName('B6').setText('full_name');
+    workSheet.getRangeByName('B7').setText('phone_number');
+    workSheet.getRangeByName('B8').setText('date_of_birth');
+    workSheet.getRangeByName('B9').setText('order_id');
+    workSheet.getRangeByName('B10').setText('car_id');
+    workSheet.getRangeByName('B11').setText('car_name');
+    workSheet.getRangeByName('B12').setText('rental_price');
+    workSheet.getRangeByName('B13').setText('rental_start_date');
+    workSheet.getRangeByName('B14').setText('rental_end_date');
+    workSheet.getRangeByName('B15').setText('filling_address');
+    workSheet.getRangeByName('B16').setText('return_address');
+    workSheet.getRangeByName('B17').setText('order_created_date');
+    workSheet.getRangeByName('C3').setText('Value');
+    workSheet.getRangeByName('C4').setText(uid ?? '');
+    workSheet.getRangeByName('C5').setText(userImg ?? '');
+    workSheet.getRangeByName('C6').setText(fullName ?? '');
+    workSheet.getRangeByName('C7').setText(phoneNumber ?? '');
+    workSheet.getRangeByName('C8').setText(dateOfBirth ?? '');
+    workSheet.getRangeByName('C9').setNumber(orderId);
+    workSheet.getRangeByName('C10').setNumber(carId);
+    workSheet.getRangeByName('C11').setText(carName);
+    workSheet.getRangeByName('C12').setNumber(rentalPrice);
+    workSheet.getRangeByName('C13').setText(rentalStartDate);
+    workSheet.getRangeByName('C14').setText(rentalStartDate);
+    workSheet.getRangeByName('C15').setText(fillingAddress);
+    workSheet.getRangeByName('C16').setText(returnAddress);
+    workSheet.getRangeByName('C17').setText(orderCreatedTime);
+
+    final bytes = workbook.saveAsStream();
+    workbook.dispose();
+    final path = (await getApplicationSupportDirectory()).path;
+    final fileName = '$path/UserOrders.xlsx';
+    final file = File(fileName);
+    await file.writeAsBytes(bytes, flush: true);
+  }
+
+  Future<void> _sendWithEmail(
+    String carName,
+  ) async {
+    final path = (await getApplicationSupportDirectory()).path;
+    final fileName = '$path/UserOrders.xlsx';
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    String? platformResponse = '';
+    try {
+      final email = Email(
+        body: 'Информация, предоставленная пользователем fullName для аренды и возврата автомобиля $carName',
+        subject: 'Договор аренды кабриолета',
+        recipients: <String>['vladislav.vulf@gmail.com'],
+        attachmentPaths: [fileName],
+      );
+
+      await FlutterEmailSender.send(email);
+    } on PlatformException catch (error) {
+      platformResponse = error.toString();
+      print(error);
+      if (!mounted) {
+        return;
+      }
+    } catch (error) {
+      platformResponse = error.toString();
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) {
+      return;
     }
   }
 
@@ -236,27 +342,6 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
       print(_date);
     }
   }
-
-  //
-  // void _dateTimeComparison(List<int>? dateTime1, List<int>? dateTime2) {
-  //   if (dateTime2!.isNotEmpty) {
-  //     if (dateTime2[0] > dateTime1![0]) {
-  //       final yh = dateTime2[0];
-  //       dateTime1[0] = dateTime2[0];
-  //       dateTime2[0] = yh;
-  //     } else if (dateTime2[1] > dateTime1[1]) {
-  //       final mm = dateTime2[1];
-  //       dateTime1[1] = dateTime2[1];
-  //       dateTime2[1] = mm;
-  //     } else if (dateTime2.length == 3 && dateTime1.length == 3) {
-  //       if (dateTime2[3] > dateTime1[3]) {
-  //         final d = dateTime2[3];
-  //         dateTime1[3] = dateTime2[3];
-  //         dateTime2[3] = d;
-  //       }
-  //     }
-  //   }
-  // }
 
   Future<void> _materialTimePicker({
     required TextEditingController timeTextEditingController,
@@ -408,6 +493,10 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                               height: 35.h,
                               bgColor: Colors.transparent,
                               borderR: 10,
+                              size: 20,
+
+                              obscureText: false,
+
                               keyboardType: TextInputType.text,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10).r,
@@ -429,15 +518,13 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                               hintText: '23/01/2023',
                               icon: 'assets/icons/pay/calendar.svg',
                               contentPaddingHorizontal: 10,
-                              validator: (value) {
-                                return value == null || value.isEmpty ? 'Поле не может быть пустым!' : null;
-                              },
-                              onSaved: (value) {},
+                              errorText: date1TextEditingController.text.isEmpty ? 'Поле не может быть пустым!' : null,
                               onChanged: (String? value) {},
                             ),
                           ),
                           Flexible(
                             child: MainTextFormField(
+                              obscureText: false,
                               textEditingController: time1TextEditingController,
                               horizontalPadding: 10,
                               label: '',
@@ -446,6 +533,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                               marginContainer: 0,
                               width: 200.w,
                               height: 35.h,
+                              size: 20,
                               bgColor: AppColors.secondColor,
                               borderR: 10,
                               keyboardType: TextInputType.datetime,
@@ -466,10 +554,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                               hintText: '12:00',
                               icon: 'assets/icons/pay/timer.svg',
                               contentPaddingHorizontal: 10,
-                              validator: (value) {
-                                return value == null || value.isEmpty ? 'Поле не может быть пустым!' : null;
-                              },
-                              onSaved: (value) {},
+                              errorText: time1TextEditingController.text.isEmpty ? 'Поле не может быть пустым!' : null,
                               onChanged: (String? value) {},
                             ),
                           ),
@@ -491,6 +576,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                         children: [
                           Flexible(
                             child: MainTextFormField(
+                              obscureText: false,
                               textEditingController: date2TextEditingController,
                               horizontalPadding: 10,
                               label: '',
@@ -501,6 +587,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                               height: 35.h,
                               bgColor: AppColors.secondColor,
                               borderR: 10,
+                              size: 20,
                               keyboardType: TextInputType.datetime,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10).r,
@@ -519,28 +606,13 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                               hintText: '23/01/2023',
                               icon: 'assets/icons/pay/calendar.svg',
                               contentPaddingHorizontal: 10,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Поле не может быть пустым!';
-                                } else {
-                                  // if (date1.isNotEmpty && date2.isNotEmpty) {
-                                  //   if (date1[0] < date2[0]) {
-                                  //     return 'День введен неправильно';
-                                  //   } else if (date1[1] < date2[1]) {
-                                  //     return 'Месяц введен неверно';
-                                  //   } else if (date1[2] < date2[2]) {
-                                  //     return 'Год введен неверно';
-                                  //   }
-                                  // }
-                                  return null;
-                                }
-                              },
-                              onSaved: (value) {},
+                              errorText: date2TextEditingController.text.isEmpty ? 'Поле не может быть пустым!' : null,
                               onChanged: (String? value) {},
                             ),
                           ),
                           Flexible(
                             child: MainTextFormField(
+                              obscureText: false,
                               textEditingController: time2TextEditingController,
                               horizontalPadding: 10,
                               label: '',
@@ -551,6 +623,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                               height: 35.h,
                               bgColor: AppColors.secondColor,
                               borderR: 10,
+                              size: 20,
                               keyboardType: TextInputType.datetime,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10).r,
@@ -569,21 +642,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                               hintText: '12:00',
                               icon: 'assets/icons/pay/timer.svg',
                               contentPaddingHorizontal: 10,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Поле не может быть пустым!';
-                                } else {
-                                  // if (time1.isNotEmpty && time2.isNotEmpty) {
-                                  //   if (time1[0] < time2[0]) {
-                                  //     return 'Часы были введены неправильно';
-                                  //   } else if (time1[1] < time2[1]) {
-                                  //     return 'Неправильно введена минута';
-                                  //   }
-                                  // }
-                                  return null;
-                                }
-                              },
-                              onSaved: (value) {},
+                              errorText: time2TextEditingController.text.isEmpty ? 'Поле не может быть пустым!' : null,
                               onChanged: (String? value) {},
                             ),
                           ),
@@ -601,6 +660,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                         ),
                       ),
                       MainTextFormField(
+                        obscureText: false,
                         textEditingController: address1TextEditingController,
                         horizontalPadding: 10,
                         label: '',
@@ -612,6 +672,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                         bgColor: AppColors.secondColor,
                         borderR: 10,
                         keyboardType: TextInputType.streetAddress,
+                        errorText: '',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10).r,
                           borderSide: const BorderSide(
@@ -619,10 +680,6 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                           ),
                         ),
                         contentPaddingHorizontal: 10,
-                        validator: (value) {
-                          return null;
-                        },
-                        onSaved: (value) {},
                         onChanged: (String? value) {},
                       ),
                       Padding(
@@ -639,6 +696,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                       MainTextFormField(
                         textEditingController: address2TextEditingController,
                         horizontalPadding: 10,
+                        obscureText: false,
                         label: '',
                         labelFontSize: AppSizes.mainButtonText,
                         labelColor: AppColors.textColor,
@@ -654,11 +712,8 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                             color: Colors.grey,
                           ),
                         ),
+                        errorText: '',
                         contentPaddingHorizontal: 10,
-                        validator: (value) {
-                          return null;
-                        },
-                        onSaved: (value) {},
                         onChanged: (String? value) {},
                       ),
                     ],
@@ -667,47 +722,107 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 30).r,
-                child: MainButton(
-                  title: 'Забронировать авто',
-                  borderWidth: 0,
-                  height: 37.h,
-                  width: MediaQuery.of(context).size.width,
-                  borderColor: Colors.transparent,
-                  titleColor: Colors.white,
-                  bgColor: AppColors.mainColor,
-                  fontSize: AppSizes.mainButtonText,
-                  fontWeight: FontWeight.w400,
-                  onTap: () {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      rentalPrice = price(rentalPrice);
-                      generateOrderId();
-                      _saveUserDataToFirebaseFirestore(rentalPrice, carName!);
-                      if (kDebugMode) {
-                        print(true);
-                      }
-                      Navigator.of(context).pushAndRemoveUntil(
-                        Platform.isIOS
-                            ? CupertinoPageRoute(
-                                builder: (_) => SuccessfulCheckoutScreen(
-                                  orderId: orderId,
-                                  index: carId,
-                                ),
-                                maintainState: false,
+                child: BlocBuilder<AccountBloc, AccountState>(
+                  builder: (context, state) {
+                    if (state is UserDataLoaded) {
+                      userModel = {
+                        'id': state.userData['id'],
+                        'fullName': state.userData['fullName'],
+                        'imageUrl': state.userData['imageUrl'],
+                        'phoneNumber': state.userData['phoneNumber'],
+                        'email': state.userData['email'],
+                        'password': state.userData['password'],
+                        'dateOfBirth': state.userData['dateOfBirth']
+                      };
+                      print(userModel);
+                      return MainButton(
+                        title: 'Забронировать авто',
+                        borderWidth: 0,
+                        height: 37.h,
+                        width: MediaQuery.of(context).size.width,
+                        borderColor: Colors.transparent,
+                        titleColor: Colors.white,
+                        bgColor: AppColors.mainColor,
+                        fontSize: AppSizes.mainButtonText,
+                        fontWeight: FontWeight.w400,
+                        onTap: () async {
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+                            rentalPrice = price(rentalPrice);
+                            generateOrderId();
+                            await _saveUserDataToFirebaseFirestore(
+                              rentalPrice,
+                              carName!,
+                              userModel,
+                            ).then(
+                              (value) async => _createOrderExcel(
+                                uid: _firebaseAuth.currentUser?.uid ?? '',
+                                userImg: userModel?['imageUrl'].toString() ?? '',
+                                fullName: userModel?['fullName'].toString() ?? '',
+                                phoneNumber: userModel?['phoneNumber'].toString() ?? '',
+                                dateOfBirth: userModel?['dateOfBirth'].toString() ?? '',
+                                orderId: orderId.toDouble(),
+                                carId: carId!.toDouble(),
+                                carName: carName!,
+                                rentalPrice: rentalPrice.toDouble(),
+                                rentalStartDate: DateTime(
+                                  date1[0],
+                                  date1[1],
+                                  date1[2],
+                                  time1[0],
+                                  time1[1],
+                                ).toString(),
+                                rentalEndDate: DateTime(
+                                  date2[0],
+                                  date2[1],
+                                  date2[2],
+                                  time2[0],
+                                  time2[1],
+                                ).toString(),
+                                orderCreatedTime: DateTime.now().toString(),
+                                fillingAddress: address1TextEditingController.text,
+                                returnAddress: address2TextEditingController.text,
                               )
-                            : MaterialPageRoute(
-                                builder: (_) => SuccessfulCheckoutScreen(
-                                  orderId: orderId,
-                                  index: carId,
-                                ),
-                                maintainState: false,
-                              ),
-                        (route) => true,
+                                  .then(
+                                    (value) async => _sendWithEmail(
+                                      carName!,
+                                    ),
+                                  )
+                                  .then(
+                                    (value) => Navigator.of(context).pushAndRemoveUntil(
+                                      Platform.isIOS
+                                          ? CupertinoPageRoute(
+                                              builder: (_) => SuccessfulCheckoutScreen(
+                                                orderId: orderId,
+                                                index: carId,
+                                              ),
+                                              maintainState: false,
+                                            )
+                                          : MaterialPageRoute(
+                                              builder: (_) => SuccessfulCheckoutScreen(
+                                                orderId: orderId,
+                                                index: carId,
+                                              ),
+                                              maintainState: false,
+                                            ),
+                                      (route) => true,
+                                    ),
+                                  ),
+                            );
+                            if (kDebugMode) {
+                              print(true);
+                            }
+                          }
+                        },
+                        borderRadius: 8,
+                        widget: null,
                       );
+                    } else if (state is UserDataLoading) {
+                      return const Center(child: CircularProgressIndicator.adaptive());
+                    } else {
+                      return Container();
                     }
                   },
-                  borderRadius: 8,
-                  widget: null,
                 ),
               ),
             ],
@@ -717,10 +832,10 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
       floatingActionButton: AccountPageButton(
         onTap: () => Navigator.of(context).push(
           Platform.isIOS
-              ? CupertinoPageRoute(
+              ? CupertinoPageRoute<void>(
                   builder: (_) => const AccountPage(),
                 )
-              : MaterialPageRoute(
+              : MaterialPageRoute<void>(
                   builder: (_) => const AccountPage(),
                 ),
         ),

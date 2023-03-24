@@ -13,6 +13,7 @@ class AuthenticationRepository {
     required PhoneVerificationCompleted phoneVerificationCompleted,
     required PhoneVerificationFailed phoneVerificationFailed,
     required PhoneCodeSent phoneCodeSent,
+    required int timeOutOtp,
     required PhoneCodeAutoRetrievalTimeout autoRetrievalTimeout,
     int? forceResendToken,
   }) =>
@@ -22,6 +23,7 @@ class AuthenticationRepository {
         phoneVerificationFailed: phoneVerificationFailed,
         phoneCodeSent: phoneCodeSent,
         autoRetrievalTimeout: autoRetrievalTimeout,
+        timeOutOtp: timeOutOtp,
       );
 
   Future<User?> verifyPhoneNumber({

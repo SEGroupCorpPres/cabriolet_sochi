@@ -9,6 +9,7 @@ abstract class BaseAuthenticationProvider {
     required PhoneVerificationCompleted phoneVerificationCompleted,
     required PhoneVerificationFailed phoneVerificationFailed,
     required PhoneCodeSent phoneCodeSent,
+    required int timeOutOtp,
     required PhoneCodeAutoRetrievalTimeout autoRetrievalTimeout,
     int? forceResendToken,
   });

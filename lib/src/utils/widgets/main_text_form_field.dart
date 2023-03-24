@@ -14,6 +14,7 @@ class MainTextFormField extends StatelessWidget {
   final double marginContainer;
   final double width;
   final double height;
+  final double? size;
   final Color bgColor;
   final double borderR;
   final void Function()? onTap;
@@ -22,10 +23,12 @@ class MainTextFormField extends StatelessWidget {
   final double contentPaddingHorizontal;
   final String? hintText;
   final String? icon;
+  final bool obscureText;
   final TextEditingController textEditingController;
-  final String? Function(String?)? validator;
-  final Function(dynamic?)? onSaved;
+  final String? errorText;
   final Function(String?) onChanged;
+  final Function()? onPressed;
+  final bool? isPassword;
 
   const MainTextFormField({
     super.key,
@@ -36,6 +39,7 @@ class MainTextFormField extends StatelessWidget {
     required this.marginContainer,
     required this.width,
     required this.height,
+    this.size,
     required this.bgColor,
     required this.borderR,
     this.onTap,
@@ -45,9 +49,11 @@ class MainTextFormField extends StatelessWidget {
     this.icon,
     this.hintText,
     required this.textEditingController,
-    required this.validator,
-    this.onSaved,
+    required this.errorText,
     required this.onChanged,
+    this.onPressed,
+    required this.obscureText,
+    this.isPassword = false,
   });
 
   @override
@@ -74,17 +80,20 @@ class MainTextFormField extends StatelessWidget {
                 color: bgColor,
                 borderRadius: BorderRadius.circular(borderR).r,
               ),
-              child: TextFormField(
+              child: TextField(
                 onTap: onTap,
                 controller: textEditingController,
+                obscureText: obscureText,
                 style: GoogleFonts.montserrat(),
                 keyboardType: keyboardType,
+                obscuringCharacter: '*',
                 decoration: InputDecoration(
-                  constraints: BoxConstraints(maxHeight: 50),
+                  constraints: const BoxConstraints.expand(),
                   errorStyle: GoogleFonts.montserrat(
                     fontSize: 10,
                     fontWeight: FontWeight.w300,
                   ),
+                  errorText: errorText,
                   // errorBorder: ,
                   border: border,
                   contentPadding: EdgeInsets.symmetric(
@@ -99,18 +108,19 @@ class MainTextFormField extends StatelessWidget {
                   suffixIcon: icon == null
                       ? Container()
                       : Padding(
-                    padding: EdgeInsetsDirectional.only(end: 5.w, start: 0.w),
-                    child: SvgPicture.asset(
-                      icon!,
-                      color: Colors.grey.withOpacity(0.5),
-                      height: 18.r,
-                      width: 18.r,
-                    ),
-                  ),
-                  suffixIconConstraints: const BoxConstraints.expand(width: 20, height: 20).r,
+                          padding: EdgeInsetsDirectional.only(end: 5.w, start: 0.w),
+                          child: GestureDetector(
+                            onTap: onPressed,
+                            child: SvgPicture.asset(
+                              icon!,
+                              color: Colors.grey.withOpacity(0.5),
+                              height: size!.h,
+                              width: size!.w,
+                            ),
+                          ),
+                        ),
+                  suffixIconConstraints: isPassword! ? const BoxConstraints.expand(width: 25, height: 25).r : const BoxConstraints.expand(width: 20, height: 20).r,
                 ),
-                validator: validator,
-                onSaved: onSaved,
                 onChanged: onChanged,
               ),
             ),

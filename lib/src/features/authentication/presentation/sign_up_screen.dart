@@ -37,10 +37,13 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  TextEditingController _emailTextEditingController = TextEditingController();
+  TextEditingController _passwordTextEditingController = TextEditingController();
   TextEditingController _phoneTextEditingController = TextEditingController();
   TextEditingController _nameTextEditingController = TextEditingController();
   TextEditingController _dateTextEditingController = TextEditingController();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  bool isVisible = true;
   DateTime _date = DateTime.now();
   final DateTime _dateForAge = DateTime.now();
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
@@ -79,6 +82,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           final user = UserModel(
             fullName: _nameTextEditingController.text,
             dateOfBirth: _date,
+            email: _emailTextEditingController.text,
+            password: _passwordTextEditingController.text,
             imageUrl: imageUrl,
             phoneNumber: _phoneTextEditingController.text,
             id: _firebaseAuth.currentUser!.uid,
@@ -481,6 +486,50 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     child: Column(
                       children: [
                         MainTextFormField(
+                          textEditingController: _emailTextEditingController,
+                          horizontalPadding: 0,
+                          label: 'Электронная почта',
+                          labelFontSize: AppSizes.mainLabel,
+                          labelColor: AppColors.labelColor,
+                          marginContainer: 10,
+                          width: MediaQuery.of(context).size.width,
+                          height: 35.h,
+                          bgColor: const Color(0xffFFE0E0),
+                          borderR: 8,
+                          keyboardType: TextInputType.emailAddress,
+                          border: InputBorder.none,
+                          errorText: _emailTextEditingController.text.isEmpty ? 'Электронная почта не должны быть пустыми' : null,
+                          contentPaddingHorizontal: 15,
+                          onChanged: (String? value) {},
+                          obscureText: false,
+                        ),
+                        MainTextFormField(
+                          textEditingController: _passwordTextEditingController,
+                          horizontalPadding: 0,
+                          label: 'Пароль от электронной почты',
+                          labelFontSize: AppSizes.mainLabel,
+                          labelColor: AppColors.labelColor,
+                          marginContainer: 10,
+                          width: MediaQuery.of(context).size.width,
+                          obscureText: isVisible,
+                          height: 35.h,
+                          bgColor: const Color(0xffFFE0E0),
+                          borderR: 8,
+                          keyboardType: TextInputType.text,
+                          border: InputBorder.none,
+                          errorText: _passwordTextEditingController.text.isEmpty ? 'Область не может быть пустой' : null,
+                          contentPaddingHorizontal: 15,
+                          icon: isVisible ? 'assets/icons/profile/eye_off.svg' : 'assets/icons/profile/eye.svg',
+                          size: 20,
+                          onChanged: (String? value) {},
+                          onPressed: () {
+                            setState(() {
+                              isVisible = !isVisible;
+                            });
+                          },
+                          isPassword: true,
+                        ),
+                        MainTextFormField(
                           textEditingController: _nameTextEditingController,
                           horizontalPadding: 0,
                           label: 'Фамилия, Имя',
@@ -493,14 +542,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           borderR: 8,
                           keyboardType: TextInputType.text,
                           border: InputBorder.none,
+                          errorText: _nameTextEditingController.text.isEmpty ? 'Фамилия и Имя не должны быть пустыми' : null,
                           contentPaddingHorizontal: 15,
-                          validator: (value) {
-                            return value == null ? 'Фамилия и Имя не должны быть пустыми' : null;
-                          },
-                          onSaved: (value) {},
                           onChanged: (String? value) {},
+                          obscureText: false,
                         ),
                         MainTextFormField(
+                          obscureText: false,
                           textEditingController: _phoneTextEditingController,
                           horizontalPadding: 0,
                           label: 'Телефон',
@@ -514,18 +562,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           keyboardType: TextInputType.phone,
                           border: InputBorder.none,
                           contentPaddingHorizontal: 15,
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Область не может быть пустой';
-                            } else if (value.toString().length - 1 < 11) {
-                              return 'Номер телефона должен состоять из 11 цифр.';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {},
+                          errorText: _phoneTextEditingController.text.isEmpty
+                              ? 'Область не может быть пустой'
+                              : _phoneTextEditingController.text.length - 1 < 7
+                                  ? 'Номер телефона должен состоять из 7 цифр.'
+                                  : null,
                           onChanged: (String? value) {},
                         ),
                         MainTextFormField(
+                          obscureText: false,
                           textEditingController: _dateTextEditingController,
                           horizontalPadding: 0,
                           label: 'Дата рождения',
@@ -540,13 +585,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           keyboardType: TextInputType.text,
                           border: InputBorder.none,
                           contentPaddingHorizontal: 15,
-                          validator: (value) {
-                            return null;
-                          },
-                          onSaved: (value) {
-                            // _date=value as DateTime;
-                            // print(value);
-                          },
+                          errorText: _dateTextEditingController.text.isEmpty ? 'Дата рождения не может быть пустой' : null,
                           onChanged: (String? value) {},
                         ),
                       ],

@@ -25,6 +25,8 @@ class LessCarInfo extends StatelessWidget {
           fontWeight: FontWeight.w400,
           color: AppColors.textColor,
         ),
+        textAlign: TextAlign.start,
+        softWrap: true,
       ),
     );
   }

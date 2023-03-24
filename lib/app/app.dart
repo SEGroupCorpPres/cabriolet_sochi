@@ -4,8 +4,10 @@ import 'package:cabriolet_sochi/app/bloc/app_bloc.dart';
 import 'package:cabriolet_sochi/routing/app_routes.dart';
 import 'package:cabriolet_sochi/src/constants/colors.dart';
 import 'package:cabriolet_sochi/src/features/account/presentation/account_page.dart';
+import 'package:cabriolet_sochi/src/features/authentication/presentation/authentication_confirm.dart';
 import 'package:cabriolet_sochi/src/features/authentication/presentation/authentication_screen.dart';
 import 'package:cabriolet_sochi/src/features/authentication/presentation/sign_up_screen.dart';
+import 'package:cabriolet_sochi/src/features/home/presentation/pages/home.dart';
 import 'package:cabriolet_sochi/src/features/home/presentation/pages/splash.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -79,7 +81,6 @@ class _AppState extends State<App> {
               return const SignUpScreen();
             }
           } else if (state is UnAuthenticated) {
-            // if (isFirstTimeEntry!) {
             print('user Id: ${widget.uid}');
             getIsFirstTimeEntry(true);
             return SplashScreen(isFirstTimeEntry: true,);
@@ -88,6 +89,7 @@ class _AppState extends State<App> {
           }
         },
       ),
+      // child: AuthenticationConfirm(),
     );
   }
 }
