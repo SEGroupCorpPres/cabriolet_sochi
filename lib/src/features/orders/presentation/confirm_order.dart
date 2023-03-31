@@ -9,6 +9,7 @@ import 'package:cabriolet_sochi/src/features/checkout/presentation/successful_ch
 import 'package:cabriolet_sochi/src/features/home/bloc/home_bloc.dart';
 import 'package:cabriolet_sochi/src/features/orders/cubit/orders_cubit.dart';
 import 'package:cabriolet_sochi/src/features/orders/data/models/order_model.dart';
+import 'package:cabriolet_sochi/src/utils/services/order_notification.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/account_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/account_page_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/app_bar_title.dart';
@@ -25,6 +26,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 
 /// ConfirmOrderScreen
@@ -46,6 +48,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
   int? carId;
   int rentalPrice = 0;
   String? carName;
+  String carImgUrl = '';
   TextEditingController address1TextEditingController = TextEditingController();
   TextEditingController address2TextEditingController = TextEditingController();
   TextEditingController date1TextEditingController = TextEditingController();
@@ -204,7 +207,9 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
       final email = Email(
         body: 'Информация, предоставленная пользователем fullName для аренды и возврата автомобиля $carName',
         subject: 'Договор аренды кабриолета',
-        recipients: <String>['vladislav.vulf@gmail.com'],
+        recipients: <String>['cabrioletsochi2012@yandex.ru'],
+        // recipients: <String> ['vladislav.vulf@gmail.com'],
+        // recipients: <String>['artessdu@gmail.com'],
         attachmentPaths: [fileName],
       );
 
@@ -417,7 +422,8 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                   } else if (state is CarDataLoaded) {
                     final carModel = state.carData;
                     rentalPrice = carModel[carId!].rentalPrice!;
-                    carName = '${carModel[carId!].name} ${carModel[carId!].description}';
+                    carName = '${carModel[carId!].name} ${carModel[carId!].model} ${carModel[carId!].year}';
+                    carImgUrl = carModel[0].images![0]!;
                     return ListTile(
                       leading: Container(
                         width: 70.r,
@@ -494,9 +500,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                               bgColor: Colors.transparent,
                               borderR: 10,
                               size: 20,
-
                               obscureText: false,
-
                               keyboardType: TextInputType.text,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10).r,
@@ -791,14 +795,14 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                                   .then(
                                     (value) => Navigator.of(context).pushAndRemoveUntil(
                                       Platform.isIOS
-                                          ? CupertinoPageRoute(
+                                          ? CupertinoPageRoute<void>(
                                               builder: (_) => SuccessfulCheckoutScreen(
                                                 orderId: orderId,
                                                 index: carId,
                                               ),
                                               maintainState: false,
                                             )
-                                          : MaterialPageRoute(
+                                          : MaterialPageRoute<void>(
                                               builder: (_) => SuccessfulCheckoutScreen(
                                                 orderId: orderId,
                                                 index: carId,
@@ -807,7 +811,31 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                                             ),
                                       (route) => true,
                                     ),
-                                  ),
+                                  )
+                                  .then((value) async {
+                                final prefs = await SharedPreferences.getInstance();
+                                await prefs.setInt('orderId', orderId);
+                                await prefs.setString('carName', carName!);
+                                await prefs.setStringList(
+                                  'date2',
+                                  <String>[date2[0].toString(), date2[1].toString(), date2[2].toString(), time2[0].toString(), time2[1].toString()],
+                                );
+                                await prefs.setString(
+                                  'userImgUrl',
+                                  userModel!['imageUrl']!.toString(),
+                                );
+                                await prefs.setString('carImgUrl', carImgUrl);
+                                final isNotify = prefs.getBool('isNotify');
+                                if (isNotify!) {
+                                  print(isNotify);
+                                  return await OrderNotificationService().showNotification(
+                                    title: 'Поздравляем!',
+                                    body: 'Вы забронировали автомобиль $carName до $date2 $time2',
+                                    userImgUrl: userModel!['imageUrl']!.toString(),
+                                    carImgUrl: carImgUrl,
+                                  );
+                                }
+                              }),
                             );
                             if (kDebugMode) {
                               print(true);

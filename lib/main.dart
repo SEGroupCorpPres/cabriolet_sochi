@@ -11,6 +11,7 @@ import 'package:cabriolet_sochi/src/features/cart/domain/repositories/cart_repos
 import 'package:cabriolet_sochi/src/features/home/bloc/home_bloc.dart';
 import 'package:cabriolet_sochi/src/features/home/domain/repositories/car_repository.dart';
 import 'package:cabriolet_sochi/src/features/orders/cubit/orders_cubit.dart';
+import 'package:cabriolet_sochi/src/utils/services/order_notification.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,13 +22,38 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await OrderNotificationService().init();
   final prefs = await SharedPreferences.getInstance();
-  final uid = prefs.getString('uid');
-  final isFirstTimeEntry = prefs.getBool('isFirstTimeEntry') ?? true;
+  final uid = prefs.getString('uid') ?? '';
   final authenticationRepository = AuthenticationRepository();
   final carRepository = CarRepository();
   final accountRepository = AccountRepository();
   final cartRepository = CartRepository();
+  final userImgUrl = prefs.getString('userImgUrl') ?? '';
+  final carImgUrl = prefs.getString('carImgUrl') ?? '';
+  final orderId = prefs.getInt('orderId');
+  final dateList = prefs.getStringList('date2') ?? [''];
+  final carName = prefs.getString('carName') ?? '';
+  final isNotify = prefs.getBool('isNotify') ?? false;
+  if (isNotify) {
+    if (orderId != null && carName.isNotEmpty && dateList.isNotEmpty && dateList.length > 2 && userImgUrl.isNotEmpty && carImgUrl.isNotEmpty) {
+      await OrderNotificationService().showScheduleNotification(
+        id: orderId,
+        title: 'Внимание!!!',
+        body: 'Аренда вашего автомобиля $carName до ${dateList[0]}.${dateList[1]}.${dateList[2]} ${dateList[3]}:${dateList[4]} заканчивается через 1 час',
+        dateTime: DateTime(
+          int.tryParse(dateList[0])!,
+          int.tryParse(dateList[1])!,
+          int.tryParse(dateList[2])!,
+          (int.tryParse(dateList[3]))! - 1,
+          int.tryParse(dateList[4])!,
+        ),
+        seconds: 3,
+        userImgUrl: userImgUrl,
+        carImgUrl: carImgUrl,
+      );
+    }
+  }
   BlocOverrides.runZoned(
     () => runApp(
       MultiBlocProvider(
@@ -64,7 +90,6 @@ Future<void> main() async {
         ],
         child: App(
           uid: uid,
-          isFirstTimeEntry: isFirstTimeEntry,
         ),
       ),
     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,29 +8,6 @@ import '../../constants/colors.dart';
 import '../../constants/sizes.dart';
 
 class MainTextFormField extends StatelessWidget {
-  final double horizontalPadding;
-  final String label;
-  final double labelFontSize;
-  final Color labelColor;
-  final double marginContainer;
-  final double width;
-  final double height;
-  final double? size;
-  final Color bgColor;
-  final double borderR;
-  final void Function()? onTap;
-  final TextInputType keyboardType;
-  final InputBorder border;
-  final double contentPaddingHorizontal;
-  final String? hintText;
-  final String? icon;
-  final bool obscureText;
-  final TextEditingController textEditingController;
-  final String? errorText;
-  final Function(String?) onChanged;
-  final Function()? onPressed;
-  final bool? isPassword;
-
   const MainTextFormField({
     super.key,
     required this.horizontalPadding,
@@ -54,7 +32,32 @@ class MainTextFormField extends StatelessWidget {
     this.onPressed,
     required this.obscureText,
     this.isPassword = false,
+    this.inputFormatters,
   });
+
+  final double horizontalPadding;
+  final String label;
+  final double labelFontSize;
+  final Color labelColor;
+  final double marginContainer;
+  final double width;
+  final double height;
+  final double? size;
+  final Color bgColor;
+  final double borderR;
+  final void Function()? onTap;
+  final TextInputType keyboardType;
+  final InputBorder border;
+  final double contentPaddingHorizontal;
+  final String? hintText;
+  final String? icon;
+  final bool obscureText;
+  final TextEditingController textEditingController;
+  final String? errorText;
+  final Function(String?) onChanged;
+  final Function()? onPressed;
+  final bool? isPassword;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +90,8 @@ class MainTextFormField extends StatelessWidget {
                 style: GoogleFonts.montserrat(),
                 keyboardType: keyboardType,
                 obscuringCharacter: '*',
+                inputFormatters: inputFormatters,
+                textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
                   constraints: const BoxConstraints.expand(),
                   errorStyle: GoogleFonts.montserrat(
@@ -99,6 +104,8 @@ class MainTextFormField extends StatelessWidget {
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: contentPaddingHorizontal,
                   ).r,
+                  // isCollapsed: true,
+                  isDense: true,
                   hintText: hintText,
                   hintStyle: GoogleFonts.montserrat(
                     fontSize: AppSizes.fieldText,

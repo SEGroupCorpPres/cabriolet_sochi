@@ -9,6 +9,7 @@ import 'package:cabriolet_sochi/src/features/authentication/presentation/authent
 import 'package:cabriolet_sochi/src/features/authentication/presentation/sign_up_screen.dart';
 import 'package:cabriolet_sochi/src/features/home/presentation/pages/home.dart';
 import 'package:cabriolet_sochi/src/features/home/presentation/pages/splash.dart';
+import 'package:cabriolet_sochi/src/features/orders/presentation/confirm_order.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -16,12 +17,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class App extends StatefulWidget {
   final String? uid;
-  final bool? isFirstTimeEntry;
 
   const App({
     super.key,
     required this.uid,
-    required this.isFirstTimeEntry,
   });
 
   @override
@@ -29,11 +28,6 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  Future<void> getIsFirstTimeEntry(bool isFirstEntry) async {
-    final prefs = await SharedPreferences.getInstance();
-    // widget.isFirstTimeEntry = prefs.getBool('isFirstTimeEntry');
-    await prefs.setBool('isFirstTimeEntry', isFirstEntry);
-  }
 
   @override
   void initState() {
@@ -75,21 +69,20 @@ class _AppState extends State<App> {
           if (state is Authenticated) {
             if (widget.uid != null && widget.uid!.isNotEmpty) {
                 print('user Id: $widget.uid');
-                return SplashScreen(isFirstTimeEntry: false);
+                return const SplashScreen();
               }
             else {
               return const SignUpScreen();
             }
           } else if (state is UnAuthenticated) {
             print('user Id: ${widget.uid}');
-            getIsFirstTimeEntry(true);
-            return SplashScreen(isFirstTimeEntry: true,);
+            return const SplashScreen();
           } else {
             return Container();
           }
         },
       ),
-      // child: AuthenticationConfirm(),
+      // child: HomePage(),
     );
   }
 }

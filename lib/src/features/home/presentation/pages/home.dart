@@ -13,6 +13,7 @@ import 'package:cabriolet_sochi/src/utils/widgets/main_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -84,41 +85,92 @@ class _HomePageState extends State<HomePage> {
     late final top = ScreenUtil().screenHeight < 800 ? 43 : 37;
     return Scaffold(
       key: scaffoldKey,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            BlocConsumer<HomeBloc, HomeState>(
-              builder: (context, state) {
-                if (state is CarDataLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  );
-                } else if (state is CarDataLoaded) {
-                  carsModel = state.carData;
-                  return _homeList(carsModel);
-                } else if (state is CarDataError) {
-                  return Center(child: Text(state.error));
-                } else {
-                  if (kDebugMode) {
-                    print('Something error');
-                  }
-                  return Container();
-                }
-              },
-              listener: (context, state) {},
-            ),
-            BlocBuilder<HomeBloc, HomeState>(
-              builder: (context, state) {
-                return Positioned(
-                  top: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 17).w,
-                    child: _filterButton(),
+      body: WillPopScope(
+        onWillPop: () async {
+          final shouldPop = await showDialog<bool>(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text(
+                  'Вы хотите выйти из приложения?',
+                  style: GoogleFonts.montserrat(
+                    fontSize: AppSizes.productName,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xff6C6C6C),
                   ),
-                );
-              },
-            ),
-          ],
+                ),
+                actionsAlignment: MainAxisAlignment.spaceBetween,
+                actions: [
+                  TextButton(
+                    onPressed: () => Platform.isAndroid
+                        ? SystemNavigator.pop()
+                        : Platform.isIOS
+                            ? exit(0)
+                            : null,
+                    child: Text(
+                      'Да',
+                      style: GoogleFonts.montserrat(
+                        fontSize: AppSizes.productName,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xff6C6C6C),
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context, false);
+                    },
+                    child: Text(
+                      'Нет',
+                      style: GoogleFonts.montserrat(
+                        fontSize: AppSizes.productName,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xff6C6C6C),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+          return shouldPop!;
+        },
+        child: SafeArea(
+          child: Stack(
+            children: [
+              BlocConsumer<HomeBloc, HomeState>(
+                builder: (context, state) {
+                  if (state is CarDataLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    );
+                  } else if (state is CarDataLoaded) {
+                    carsModel = state.carData;
+                    return _homeList(carsModel);
+                  } else if (state is CarDataError) {
+                    return Center(child: Text(state.error));
+                  } else {
+                    if (kDebugMode) {
+                      print('Something error');
+                    }
+                    return Container();
+                  }
+                },
+                listener: (context, state) {},
+              ),
+              BlocBuilder<HomeBloc, HomeState>(
+                builder: (context, state) {
+                  return Positioned(
+                    top: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 17).w,
+                      child: _filterButton(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: isExpanded

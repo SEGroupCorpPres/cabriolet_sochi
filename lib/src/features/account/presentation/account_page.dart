@@ -4,7 +4,6 @@ import 'package:cabriolet_sochi/app/bloc/app_bloc.dart';
 import 'package:cabriolet_sochi/src/constants/colors.dart';
 import 'package:cabriolet_sochi/src/constants/sizes.dart';
 import 'package:cabriolet_sochi/src/features/account/bloc/account_bloc.dart';
-import 'package:cabriolet_sochi/src/features/account/domain/repositories/account_repository.dart';
 import 'package:cabriolet_sochi/src/features/authentication/presentation/sign_up_screen.dart';
 import 'package:cabriolet_sochi/src/features/cart/presentation/cart_history_page.dart';
 import 'package:cabriolet_sochi/src/features/home/presentation/pages/home.dart';
@@ -25,13 +24,21 @@ import 'package:url_launcher/url_launcher.dart';
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
+  static Route<void> route() {
+    return Platform.isIOS
+        ? CupertinoPageRoute<void>(builder: (_) => const AccountPage())
+        : MaterialPageRoute<void>(
+            builder: (_) => const AccountPage(),
+          );
+  }
+
   @override
   State<AccountPage> createState() => _AccountPageState();
 }
 
 class _AccountPageState extends State<AccountPage> {
-  late bool isFirstTimeEntry = false;
-  late bool isChecked = false;
+  late bool isNotify = false;
+  late bool isChecked = true;
   Map<String, dynamic> user = {};
   final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
   final preferences = SharedPreferences.getInstance();
@@ -39,11 +46,11 @@ class _AccountPageState extends State<AccountPage> {
   final Uri _paymentUrl = Uri.parse('https://cabrioletsochi.ru/oplata-cabrio-online.html');
   final Uri _contactUrl = Uri.parse('https://cabrioletsochi.ru/kontakty.html');
 
-  Future<void> getIsFirstTimeEntry() async {
-    final preferences = await SharedPreferences.getInstance();
-    isFirstTimeEntry = preferences.getBool('isFirstTimeEntry') ?? false;
-    await preferences.setBool('isFirstTimeEntry', true);
-  }
+  // Future<void> getIsNotify() async {
+  //   final preferences = await SharedPreferences.getInstance();
+  //   isNotify = preferences.getBool('isFirstTimeEntry') ?? false;
+  //   await preferences.setBool('isFirstTimeEntry', true);
+  // }
 
   Future<void> clearUserId() async {
     final prefs = await SharedPreferences.getInstance();
@@ -55,9 +62,9 @@ class _AccountPageState extends State<AccountPage> {
     // TODO: implement initState
     super.initState();
     BlocProvider.of<AccountBloc>(context).add(GetData());
-    if (isFirstTimeEntry) {
-      getIsFirstTimeEntry();
-    }
+    // if (isFirstTimeEntry) {
+    //   getIsFirstTimeEntry();
+    // }
   }
 
   @override
@@ -231,7 +238,9 @@ class _AccountPageState extends State<AccountPage> {
                             padding: const EdgeInsets.only(right: 10).r,
                             child: Switch.adaptive(
                               value: isChecked,
-                              onChanged: (value) {
+                              onChanged: (value) async{
+                                final prefs = await SharedPreferences.getInstance();
+                                await prefs.setBool('isNotify', isChecked);
                                 setState(() {
                                   isChecked = value;
                                 });
@@ -247,14 +256,15 @@ class _AccountPageState extends State<AccountPage> {
                               context.read<AppBloc>().add(SignOutEvent());
                               clearUserId();
                               Navigator.of(context).pushAndRemoveUntil(
-                                  Platform.isIOS
-                                      ? CupertinoPageRoute<void>(
-                                          builder: (_) => SplashScreen(isFirstTimeEntry: true),
-                                        )
-                                      : MaterialPageRoute<void>(
-                                          builder: (_) => SplashScreen(isFirstTimeEntry: true),
-                                        ),
-                                  (route) => true);
+                                Platform.isIOS
+                                    ? CupertinoPageRoute<void>(
+                                        builder: (_) => const SplashScreen(),
+                                      )
+                                    : MaterialPageRoute<void>(
+                                        builder: (_) => const SplashScreen(),
+                                      ),
+                                (route) => true,
+                              );
                             },
                             child: ListTile(
                               title: Text(

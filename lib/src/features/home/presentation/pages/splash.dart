@@ -11,18 +11,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
-  final bool? isFirstTimeEntry;
-  SplashScreen({super.key, required this.isFirstTimeEntry});
 
-  // static Page<void> page() => Platform.isIOS ? CupertinoPage(child: SplashScreen()) : MaterialPage<void>(child: SplashScreen());
-  //
-  // static Route<void> route() {
-  //   return Platform.isIOS
-  //       ? CupertinoPageRoute<void>(builder: (_) => SplashScreen())
-  //       : MaterialPageRoute<void>(
-  //           builder: (_) => SplashScreen(),
-  //         );
-  // }
+  const SplashScreen({super.key});
+
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -30,33 +21,19 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   final _navigatorKey = GlobalKey<NavigatorState>();
-  late bool isFirstTimeEntry = widget.isFirstTimeEntry ?? false;
+  String? uid = '';
 
-  // Future<void> getIsFirstTimeEntry() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   isFirstTimeEntry = prefs.getBool('isFirstTimeEntry')!;
-  //   await prefs.setBool('isFirstTimeEntry', false);
-  // }
-
+  Future<void> _userId() async {
+    final preferences = await SharedPreferences.getInstance();
+    uid = preferences.getString('uid');
+    // print(object)
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    if (!isFirstTimeEntry) {
-      Future.delayed(const Duration(milliseconds: 1700), () {
-        Navigator.of(context).pushAndRemoveUntil(
-          Platform.isIOS
-              ? CupertinoPageRoute<void>(
-                  builder: (_) => const AccountPage(),
-                )
-              : MaterialPageRoute<void>(
-                  builder: (_) => const AccountPage(),
-                ),
-          (route) => false,
-        );
-      });
-    }
+    _userId();
   }
 
   @override
@@ -64,13 +41,24 @@ class _SplashScreenState extends State<SplashScreen> {
     // TODO: implement dispose
     super.dispose();
   }
-  @override
-  // TODO: implement mounted
-  bool get mounted => isFirstTimeEntry!;
+
   NavigatorState get _navigator => _navigatorKey.currentState!;
 
   @override
   Widget build(BuildContext context) {
+    if (uid!.length > 3) {
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        Navigator.of(context).pushReplacement(
+          Platform.isIOS
+              ? CupertinoPageRoute<void>(
+                  builder: (_) => const AccountPage(),
+                )
+              : MaterialPageRoute<void>(
+                  builder: (_) => const AccountPage(),
+                ),
+        );
+      });
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       body: DecoratedBox(
@@ -121,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 ),
                 Visibility(
-                  visible: isFirstTimeEntry! ? true : false,
+                  visible: uid == null || uid!.isEmpty,
                   child: MainButton(
                     widget: null,
                     title: 'Войти',
@@ -139,7 +127,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                     borderRadius: 8,
                   ),
-                )
+                ),
               ],
             ),
           ],

@@ -8,11 +8,11 @@ import 'package:cabriolet_sochi/src/features/authentication/data/models/user_mod
 import 'package:cabriolet_sochi/src/utils/widgets/app_bar_title.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/main_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/main_text_form_field.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -76,7 +76,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         if (imageFile == null) {
           print('Пожалуйста, выберите изображение');
         } else {
-          final ref = FirebaseStorage.instance.ref().child('userimages').child(_nameTextEditingController.text + '.jpg');
+          final ref = FirebaseStorage.instance.ref().child('userimages').child('${_nameTextEditingController.text}.jpg');
           await ref.putFile(imageFile!);
           imageUrl = await ref.getDownloadURL();
           final user = UserModel(
@@ -90,17 +90,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
           );
           await context.read<AuthenticationCubit>().saveUserProfile(user);
           await Navigator.of(context).pushReplacement(
-            Platform.isIOS
-                ? CupertinoPageRoute(
-                    builder: (_) => const AccountPage(),
-                  )
-                : MaterialPageRoute(
-                    builder: (_) => const AccountPage(),
-                  ),
+            AccountPage.route(),
           );
         }
       } catch (error) {
-        print('error occurred ${error.toString()}');
+        print('error occurred $error');
       } finally {
         setState(() {
           _isLoading = false;
@@ -354,6 +348,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   void dispose() {
     // TODO: implement dispose
+    _emailTextEditingController.dispose();
+    _passwordTextEditingController.dispose();
     _nameTextEditingController.dispose();
     _phoneTextEditingController.dispose();
     _dateTextEditingController.dispose();
@@ -371,265 +367,317 @@ class _SignUpScreenState extends State<SignUpScreen> {
           fontWeight: FontWeight.w800,
         ),
       ),
-      body: BlocListener<AuthenticationCubit, AuthenticationState>(
-        listener: (context, state) {
-          // TODO: implement listener}
-          if (state.status == AuthenticationStatus.profileUpdateInProgress) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.green,
-                  content: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text('Обновление профиля...'),
-                      CircularProgressIndicator(),
-                    ],
-                  ),
-                ),
-              );
-          }
-          if (state.status == AuthenticationStatus.profileUpdateComplete) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.green,
-                  content: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text('Профиль успешно обновлен...'),
-                      Icon(Icons.check),
-                    ],
-                  ),
-                ),
-              );
-            Navigator.of(context).pushReplacement(
-              Platform.isIOS
-                  ? CupertinoPageRoute<void>(
-                      builder: (_) => const AccountPage(),
-                    )
-                  : MaterialPageRoute<void>(
-                      builder: (_) => const AccountPage(),
-                    ),
-            );
-          }
-          if (state.status == AuthenticationStatus.exception) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.red,
-                  content: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text('Ошибка аутентификации'),
-                      Icon(Icons.error),
-                    ],
-                  ),
-                ),
-              );
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15).r,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Заполните информацию о себе:',
+      body: WillPopScope(
+        onWillPop: () async {
+          final shouldPop = await showDialog<bool>(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text(
+                  'Вы хотите выйти из приложения?',
                   style: GoogleFonts.montserrat(
-                    color: Colors.black,
-                    fontSize: AppSizes.mainButtonText,
+                    fontSize: AppSizes.productName,
                     fontWeight: FontWeight.w400,
+                    color: const Color(0xff6C6C6C),
                   ),
                 ),
-                Center(
-                  child: Container(
-                    width: 100.r,
-                    height: 100.r,
-                    margin: EdgeInsets.symmetric(vertical: 30.r),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(50.r),
-                      child: imageFile == null
-                          ? Image.asset('assets/images/splash/auth_profile_pic.png')
-                          : Image.file(
-                              imageFile!,
-                              fit: BoxFit.cover,
-                              width: 100.r,
-                            ),
+                actionsAlignment: MainAxisAlignment.spaceBetween,
+                actions: [
+                  TextButton(
+                    onPressed: () => Platform.isAndroid
+                        ? SystemNavigator.pop()
+                        : Platform.isIOS
+                            ? exit(0)
+                            : null,
+                    child: Text(
+                      'Да',
+                      style: GoogleFonts.montserrat(
+                        fontSize: AppSizes.productName,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xff6C6C6C),
+                      ),
                     ),
                   ),
-                ),
-                MainButton(
-                  widget: null,
-                  title: 'Загрузить фотографию',
-                  borderWidth: 1.5,
-                  height: 35.h,
-                  width: MediaQuery.of(context).size.width,
-                  borderColor: AppColors.mainColor,
-                  titleColor: AppColors.mainColor,
-                  bgColor: AppColors.secondColor,
-                  fontSize: AppSizes.mainButtonText,
-                  fontWeight: FontWeight.w400,
-                  onTap: () {
-                    Platform.isIOS ? _showCupertinoImageDialog() : _showMaterialImageDialog();
-                  },
-                  borderRadius: 8,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 30).r,
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        MainTextFormField(
-                          textEditingController: _emailTextEditingController,
-                          horizontalPadding: 0,
-                          label: 'Электронная почта',
-                          labelFontSize: AppSizes.mainLabel,
-                          labelColor: AppColors.labelColor,
-                          marginContainer: 10,
-                          width: MediaQuery.of(context).size.width,
-                          height: 35.h,
-                          bgColor: const Color(0xffFFE0E0),
-                          borderR: 8,
-                          keyboardType: TextInputType.emailAddress,
-                          border: InputBorder.none,
-                          errorText: _emailTextEditingController.text.isEmpty ? 'Электронная почта не должны быть пустыми' : null,
-                          contentPaddingHorizontal: 15,
-                          onChanged: (String? value) {},
-                          obscureText: false,
-                        ),
-                        MainTextFormField(
-                          textEditingController: _passwordTextEditingController,
-                          horizontalPadding: 0,
-                          label: 'Пароль от электронной почты',
-                          labelFontSize: AppSizes.mainLabel,
-                          labelColor: AppColors.labelColor,
-                          marginContainer: 10,
-                          width: MediaQuery.of(context).size.width,
-                          obscureText: isVisible,
-                          height: 35.h,
-                          bgColor: const Color(0xffFFE0E0),
-                          borderR: 8,
-                          keyboardType: TextInputType.text,
-                          border: InputBorder.none,
-                          errorText: _passwordTextEditingController.text.isEmpty ? 'Область не может быть пустой' : null,
-                          contentPaddingHorizontal: 15,
-                          icon: isVisible ? 'assets/icons/profile/eye_off.svg' : 'assets/icons/profile/eye.svg',
-                          size: 20,
-                          onChanged: (String? value) {},
-                          onPressed: () {
-                            setState(() {
-                              isVisible = !isVisible;
-                            });
-                          },
-                          isPassword: true,
-                        ),
-                        MainTextFormField(
-                          textEditingController: _nameTextEditingController,
-                          horizontalPadding: 0,
-                          label: 'Фамилия, Имя',
-                          labelFontSize: AppSizes.mainLabel,
-                          labelColor: AppColors.labelColor,
-                          marginContainer: 10,
-                          width: MediaQuery.of(context).size.width,
-                          height: 35.h,
-                          bgColor: const Color(0xffFFE0E0),
-                          borderR: 8,
-                          keyboardType: TextInputType.text,
-                          border: InputBorder.none,
-                          errorText: _nameTextEditingController.text.isEmpty ? 'Фамилия и Имя не должны быть пустыми' : null,
-                          contentPaddingHorizontal: 15,
-                          onChanged: (String? value) {},
-                          obscureText: false,
-                        ),
-                        MainTextFormField(
-                          obscureText: false,
-                          textEditingController: _phoneTextEditingController,
-                          horizontalPadding: 0,
-                          label: 'Телефон',
-                          labelFontSize: AppSizes.mainLabel,
-                          labelColor: AppColors.labelColor,
-                          marginContainer: 10,
-                          width: MediaQuery.of(context).size.width,
-                          height: 35.h,
-                          bgColor: const Color(0xffFFE0E0),
-                          borderR: 8,
-                          keyboardType: TextInputType.phone,
-                          border: InputBorder.none,
-                          contentPaddingHorizontal: 15,
-                          errorText: _phoneTextEditingController.text.isEmpty
-                              ? 'Область не может быть пустой'
-                              : _phoneTextEditingController.text.length - 1 < 7
-                                  ? 'Номер телефона должен состоять из 7 цифр.'
-                                  : null,
-                          onChanged: (String? value) {},
-                        ),
-                        MainTextFormField(
-                          obscureText: false,
-                          textEditingController: _dateTextEditingController,
-                          horizontalPadding: 0,
-                          label: 'Дата рождения',
-                          labelFontSize: AppSizes.mainLabel,
-                          labelColor: AppColors.labelColor,
-                          marginContainer: 10,
-                          width: MediaQuery.of(context).size.width,
-                          height: 35.h,
-                          bgColor: const Color(0xffFFE0E0),
-                          borderR: 8,
-                          onTap: Platform.isIOS ? _cupertinoDatePicker : _materialDatePicker,
-                          keyboardType: TextInputType.text,
-                          border: InputBorder.none,
-                          contentPaddingHorizontal: 15,
-                          errorText: _dateTextEditingController.text.isEmpty ? 'Дата рождения не может быть пустой' : null,
-                          onChanged: (String? value) {},
-                        ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context, false);
+                    },
+                    child: Text(
+                      'Нет',
+                      style: GoogleFonts.montserrat(
+                        fontSize: AppSizes.productName,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xff6C6C6C),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+          return shouldPop!;
+        },
+        child: BlocListener<AuthenticationCubit, AuthenticationState>(
+          listener: (context, state) {
+            // TODO: implement listener}
+            if (state.status == AuthenticationStatus.profileUpdateInProgress) {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.green,
+                    content: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text('Обновление профиля...'),
+                        CircularProgressIndicator(),
                       ],
                     ),
                   ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Внимание!',
-                      style: GoogleFonts.montserrat(
-                        color: Colors.black,
-                        fontSize: AppSizes.mainButtonText,
-                        fontWeight: FontWeight.w400,
+                );
+            }
+            if (state.status == AuthenticationStatus.profileUpdateComplete) {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.green,
+                    content: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text('Профиль успешно обновлен...'),
+                        Icon(Icons.check),
+                      ],
+                    ),
+                  ),
+                );
+              Navigator.of(context).pushReplacement(
+                Platform.isIOS
+                    ? CupertinoPageRoute<void>(
+                        builder: (_) => const AccountPage(),
+                      )
+                    : MaterialPageRoute<void>(
+                        builder: (_) => const AccountPage(),
+                      ),
+              );
+            }
+            if (state.status == AuthenticationStatus.exception) {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.red,
+                    content: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text('Ошибка аутентификации'),
+                        Icon(Icons.error),
+                      ],
+                    ),
+                  ),
+                );
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15).r,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Заполните информацию о себе:',
+                    style: GoogleFonts.montserrat(
+                      color: Colors.black,
+                      fontSize: AppSizes.mainButtonText,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  Center(
+                    child: Container(
+                      width: 100.r,
+                      height: 100.r,
+                      margin: EdgeInsets.symmetric(vertical: 30.r),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(50.r),
+                        child: imageFile == null
+                            ? Image.asset('assets/images/splash/auth_profile_pic.png')
+                            : Image.file(
+                                imageFile!,
+                                fit: BoxFit.cover,
+                                width: 100.r,
+                              ),
                       ),
                     ),
-                    Text(
-                      'Сервис доступен для лиц старше 18 лет.',
-                      style: GoogleFonts.montserrat(
-                        color: Colors.black,
-                        fontSize: AppSizes.mainButtonText,
-                        fontWeight: FontWeight.w400,
+                  ),
+                  MainButton(
+                    widget: null,
+                    title: 'Загрузить фотографию',
+                    borderWidth: 1.5,
+                    height: 35.h,
+                    width: MediaQuery.of(context).size.width,
+                    borderColor: AppColors.mainColor,
+                    titleColor: AppColors.mainColor,
+                    bgColor: AppColors.secondColor,
+                    fontSize: AppSizes.mainButtonText,
+                    fontWeight: FontWeight.w400,
+                    onTap: () {
+                      Platform.isIOS ? _showCupertinoImageDialog() : _showMaterialImageDialog();
+                    },
+                    borderRadius: 8,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 30).r,
+                    child: Form(
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          MainTextFormField(
+                            textEditingController: _emailTextEditingController,
+                            horizontalPadding: 0,
+                            label: 'Электронная почта',
+                            labelFontSize: AppSizes.mainLabel,
+                            labelColor: AppColors.labelColor,
+                            marginContainer: 10,
+                            width: MediaQuery.of(context).size.width,
+                            height: 35.h,
+                            bgColor: const Color(0xffFFE0E0),
+                            borderR: 8,
+                            keyboardType: TextInputType.emailAddress,
+                            border: InputBorder.none,
+                            errorText: _emailTextEditingController.text.isEmpty ? 'Электронная почта не должны быть пустыми' : null,
+                            contentPaddingHorizontal: 15,
+                            onChanged: (String? value) {},
+                            obscureText: false,
+                          ),
+                          MainTextFormField(
+                            textEditingController: _passwordTextEditingController,
+                            horizontalPadding: 0,
+                            label: 'Пароль от электронной почты',
+                            labelFontSize: AppSizes.mainLabel,
+                            labelColor: AppColors.labelColor,
+                            marginContainer: 10,
+                            width: MediaQuery.of(context).size.width,
+                            obscureText: isVisible,
+                            height: 35.h,
+                            bgColor: const Color(0xffFFE0E0),
+                            borderR: 8,
+                            keyboardType: TextInputType.text,
+                            border: InputBorder.none,
+                            errorText: _passwordTextEditingController.text.isEmpty ? 'Область не может быть пустой' : null,
+                            contentPaddingHorizontal: 15,
+                            icon: isVisible ? 'assets/icons/profile/eye_off.svg' : 'assets/icons/profile/eye.svg',
+                            size: 20,
+                            onChanged: (String? value) {},
+                            onPressed: () {
+                              setState(() {
+                                isVisible = !isVisible;
+                              });
+                            },
+                            isPassword: true,
+                          ),
+                          MainTextFormField(
+                            textEditingController: _nameTextEditingController,
+                            horizontalPadding: 0,
+                            label: 'Фамилия, Имя',
+                            labelFontSize: AppSizes.mainLabel,
+                            labelColor: AppColors.labelColor,
+                            marginContainer: 10,
+                            width: MediaQuery.of(context).size.width,
+                            height: 35.h,
+                            bgColor: const Color(0xffFFE0E0),
+                            borderR: 8,
+                            keyboardType: TextInputType.text,
+                            border: InputBorder.none,
+                            errorText: _nameTextEditingController.text.isEmpty ? 'Фамилия и Имя не должны быть пустыми' : null,
+                            contentPaddingHorizontal: 15,
+                            onChanged: (String? value) {},
+                            obscureText: false,
+                          ),
+                          MainTextFormField(
+                            obscureText: false,
+                            textEditingController: _phoneTextEditingController,
+                            horizontalPadding: 0,
+                            label: 'Телефон',
+                            labelFontSize: AppSizes.mainLabel,
+                            labelColor: AppColors.labelColor,
+                            marginContainer: 10,
+                            width: MediaQuery.of(context).size.width,
+                            height: 35.h,
+                            bgColor: const Color(0xffFFE0E0),
+                            borderR: 8,
+                            keyboardType: TextInputType.phone,
+                            border: InputBorder.none,
+                            contentPaddingHorizontal: 15,
+                            errorText: _phoneTextEditingController.text.isEmpty
+                                ? 'Область не может быть пустой'
+                                : _phoneTextEditingController.text.length - 1 < 7
+                                    ? 'Номер телефона должен состоять из 7 цифр.'
+                                    : null,
+                            onChanged: (String? value) {},
+                          ),
+                          MainTextFormField(
+                            obscureText: false,
+                            textEditingController: _dateTextEditingController,
+                            horizontalPadding: 0,
+                            label: 'Дата рождения',
+                            labelFontSize: AppSizes.mainLabel,
+                            labelColor: AppColors.labelColor,
+                            marginContainer: 10,
+                            width: MediaQuery.of(context).size.width,
+                            height: 35.h,
+                            bgColor: const Color(0xffFFE0E0),
+                            borderR: 8,
+                            onTap: Platform.isIOS ? _cupertinoDatePicker : _materialDatePicker,
+                            keyboardType: TextInputType.text,
+                            border: InputBorder.none,
+                            contentPaddingHorizontal: 15,
+                            errorText: _dateTextEditingController.text.isEmpty ? 'Дата рождения не может быть пустой' : null,
+                            onChanged: (String? value) {},
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-                SizedBox(height: 50.h),
-                MainButton(
-                  widget: null,
-                  title: 'Сохранить',
-                  borderWidth: 0,
-                  height: 40.h,
-                  width: MediaQuery.of(context).size.width,
-                  borderColor: Colors.transparent,
-                  titleColor: Colors.white,
-                  bgColor: AppColors.mainColor,
-                  fontSize: AppSizes.mainButtonText,
-                  fontWeight: FontWeight.w400,
-                  onTap: _saveUserDataToFirebaseFirestore,
-                  borderRadius: 8,
-                ),
-                const SizedBox(height: 50),
-              ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Внимание!',
+                        style: GoogleFonts.montserrat(
+                          color: Colors.black,
+                          fontSize: AppSizes.mainButtonText,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      Text(
+                        'Сервис доступен для лиц старше 18 лет.',
+                        style: GoogleFonts.montserrat(
+                          color: Colors.black,
+                          fontSize: AppSizes.mainButtonText,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 50.h),
+                  MainButton(
+                    widget: null,
+                    title: 'Сохранить',
+                    borderWidth: 0,
+                    height: 40.h,
+                    width: MediaQuery.of(context).size.width,
+                    borderColor: Colors.transparent,
+                    titleColor: Colors.white,
+                    bgColor: AppColors.mainColor,
+                    fontSize: AppSizes.mainButtonText,
+                    fontWeight: FontWeight.w400,
+                    onTap: _saveUserDataToFirebaseFirestore,
+                    borderRadius: 8,
+                  ),
+                  const SizedBox(height: 50),
+                ],
+              ),
             ),
           ),
         ),

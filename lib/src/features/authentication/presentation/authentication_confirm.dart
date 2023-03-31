@@ -315,9 +315,12 @@ class _AuthenticationConfirmState extends State<AuthenticationConfirm> {
         focusNode: focusNode,
         key: Key(key),
         inputType: TextInputType.number,
+
         textAlign: TextAlign.center,
         fontSize: 30.h,
-        maxLength: 1,
+
+
+      // maxLength: 1,
         onChanged: (txt) {
           _code += txt;
           _code.trim();
