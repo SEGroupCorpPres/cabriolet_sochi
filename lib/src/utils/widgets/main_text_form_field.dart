@@ -27,12 +27,16 @@ class MainTextFormField extends StatelessWidget {
     this.icon,
     this.hintText,
     required this.textEditingController,
-    required this.errorText,
     required this.onChanged,
     this.onPressed,
     required this.obscureText,
     this.isPassword = false,
     this.inputFormatters,
+    this.visible = false,
+    this.errorText = '',
+    this.focusedBorderColor,
+    this.enableBorderColor,
+    this.errorBorderColor,
   });
 
   final double horizontalPadding;
@@ -53,11 +57,13 @@ class MainTextFormField extends StatelessWidget {
   final String? icon;
   final bool obscureText;
   final TextEditingController textEditingController;
-  final String? errorText;
   final Function(String?) onChanged;
   final Function()? onPressed;
   final bool? isPassword;
   final List<TextInputFormatter>? inputFormatters;
+  final bool? visible;
+  final String? errorText;
+  final Color? focusedBorderColor, enableBorderColor, errorBorderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -76,14 +82,14 @@ class MainTextFormField extends StatelessWidget {
               ),
             ),
             Container(
-              margin: EdgeInsets.symmetric(vertical: marginContainer).r,
+              margin: EdgeInsets.only(top: marginContainer).r,
               width: width.w,
               height: height.h,
               decoration: BoxDecoration(
                 color: bgColor,
                 borderRadius: BorderRadius.circular(borderR).r,
               ),
-              child: TextField(
+              child: TextFormField(
                 onTap: onTap,
                 controller: textEditingController,
                 obscureText: obscureText,
@@ -93,19 +99,26 @@ class MainTextFormField extends StatelessWidget {
                 inputFormatters: inputFormatters,
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
-                  constraints: const BoxConstraints.expand(),
-                  errorStyle: GoogleFonts.montserrat(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w300,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(borderR).r,
+                    borderSide: BorderSide(
+                      color: focusedBorderColor ?? AppColors.secondColor,
+                    ),
                   ),
-                  errorText: errorText,
-                  // errorBorder: ,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(borderR).r,
+                    borderSide: BorderSide(
+                      color: enableBorderColor ?? AppColors.secondColor,
+                    ),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(borderR).r,
+                    borderSide: BorderSide(
+                      color: errorBorderColor ?? AppColors.secondColor,
+                    ),
+                  ),
                   border: border,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: contentPaddingHorizontal,
-                  ).r,
-                  // isCollapsed: true,
-                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: contentPaddingHorizontal, vertical: 5).r,
                   hintText: hintText,
                   hintStyle: GoogleFonts.montserrat(
                     fontSize: AppSizes.fieldText,
@@ -128,8 +141,21 @@ class MainTextFormField extends StatelessWidget {
                         ),
                   suffixIconConstraints: isPassword! ? const BoxConstraints.expand(width: 25, height: 25).r : const BoxConstraints.expand(width: 20, height: 20).r,
                 ),
-                onChanged: onChanged,
               ),
+            ),
+            Row(
+              children: [
+                Visibility(
+                  visible: visible ?? false,
+                  child: Text(
+                    errorText ?? '',
+                    style: GoogleFonts.montserrat(
+                      color: Colors.red,
+                      fontSize: 10
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

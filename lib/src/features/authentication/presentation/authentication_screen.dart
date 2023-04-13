@@ -33,13 +33,28 @@ class AuthenticationScreen extends StatefulWidget {
 
 class _AuthenticationScreenState extends State<AuthenticationScreen> {
   late TextEditingController phoneTextEditingController;
-  TextEditingController phoneText = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   late bool isChecked = false;
   final _navigatorKey = GlobalKey<NavigatorState>();
   late bool isPhoneNumberSent = false;
+  final _text = '';
 
   NavigatorState get _navigator => _navigatorKey.currentState!;
+
+  String? get _errorText {
+    // at any time, we can get the text from _controller.value.text
+    final text = phoneTextEditingController.value.text;
+    // Note: you can do your own custom validation here
+    // Move this logic this outside the widget for more testable code
+    if (text.length == 1) {
+      return 'Область не может быть пустой';
+    }
+    if (text.length < 7) {
+      return 'Номер телефона должен состоять из 7 цифр.';
+    }
+    // return null if the text is valid
+    return null;
+  }
 
   @override
   void initState() {
@@ -87,8 +102,8 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                     onPressed: () => Platform.isAndroid
                         ? SystemNavigator.pop()
                         : Platform.isIOS
-                        ? exit(0)
-                        : null,
+                            ? exit(0)
+                            : null,
                     child: Text(
                       'Да',
                       style: GoogleFonts.montserrat(
@@ -161,42 +176,53 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
               return Column(
                 children: [
                   const SizedBox(height: 40),
-                  Form(
-                    key: formKey,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    child: Column(
-                      children: [
-                        MainTextFormField(
-                          horizontalPadding: 20,
-                          label: 'Номер телефона',
-                          labelFontSize: AppSizes.mainLabel,
-                          labelColor: AppColors.labelColor,
-                          marginContainer: 10,
-                          width: MediaQuery.of(context).size.width,
-                          bgColor: const Color(0xffEBF7EE),
-                          borderR: 8,
-                          height: 32.h,
-                          obscureText: false,
-                          keyboardType: TextInputType.phone,
-                          border: InputBorder.none,
-                          contentPaddingHorizontal: 20,
-                          inputFormatters: [
-                            TextInputMask(
-                              mask: r'\+ 999 (99) 999 99 99',
-                              placeholder: '_ ',
-                              maxPlaceHolders: 13,
+                  ValueListenableBuilder(
+                    // Note: pass _controller to the animation argumen
+                    valueListenable: phoneTextEditingController,
+                    builder: (context, TextEditingValue value, __) {
+                      // this entire widget tree will rebuild every time
+                      // the controller value changes
+                      return Form(
+                        key: formKey,
+                        autovalidateMode: AutovalidateMode.disabled,
+                        child: Column(
+                          children: [
+                            MainTextFormField(
+                              horizontalPadding: 20,
+                              label: 'Номер телефона',
+                              labelFontSize: AppSizes.mainLabel,
+                              labelColor: AppColors.labelColor,
+                              marginContainer: 10,
+                              width: MediaQuery.of(context).size.width,
+                              bgColor: const Color(0xffEBF7EE),
+                              borderR: 8,
+                              height: 35,
+                              obscureText: false,
+                              keyboardType: TextInputType.phone,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: BorderSide(
+
+                                )
+                              ),
+                              contentPaddingHorizontal: 20,
+                              inputFormatters: [
+                                TextInputMask(
+                                  mask: r'\+ 999 (99) 999 99 99',
+                                  placeholder: '_ ',
+                                  maxPlaceHolders: 13,
+                                ),
+                              ],
+                              textEditingController: phoneTextEditingController,
+                              onChanged: (text) => setState(() => _text),
+                              errorText: _errorText,
+                              visible: phoneTextEditingController.value.text.length < 2,
                             ),
+
                           ],
-                          textEditingController: phoneTextEditingController,
-                          errorText: phoneTextEditingController.text == null
-                              ? 'Область не может быть пустой'
-                              : phoneTextEditingController.text.length - 1 < 7
-                                  ? 'Номер телефона должен состоять из 7 цифр.'
-                                  : null,
-                          onChanged: (String? value) async {},
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                   const Spacer(),
                   Padding(
@@ -246,12 +272,12 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                   Visibility(
                     visible: isChecked,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20).r,
                       child: MainButton(
                         widget: null,
                         title: 'Далее',
                         borderWidth: 0,
-                        height: 40.h,
+                        height: 40,
                         width: MediaQuery.of(context).size.width,
                         borderColor: Colors.transparent,
                         titleColor: Colors.white,

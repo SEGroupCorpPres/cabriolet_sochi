@@ -158,17 +158,17 @@ class _HomePageState extends State<HomePage> {
                 },
                 listener: (context, state) {},
               ),
-              BlocBuilder<HomeBloc, HomeState>(
-                builder: (context, state) {
-                  return Positioned(
+              // BlocBuilder<HomeBloc, HomeState>(
+              //   builder: (context, state) {
+            Positioned(
                     top: 0,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 17).w,
                       child: _filterButton(),
                     ),
-                  );
-                },
-              ),
+                  )
+              //   },
+              // ),
             ],
           ),
         ),
@@ -652,7 +652,7 @@ class _HomePageState extends State<HomePage> {
                               child: MainButton(
                                 title: 'Применить',
                                 borderWidth: 0,
-                                height: 50,
+                                height: 40,
                                 width: 200,
                                 borderColor: Colors.transparent,
                                 titleColor: Colors.black,

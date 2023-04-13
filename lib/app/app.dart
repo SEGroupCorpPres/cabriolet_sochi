@@ -10,6 +10,7 @@ import 'package:cabriolet_sochi/src/features/authentication/presentation/sign_up
 import 'package:cabriolet_sochi/src/features/home/presentation/pages/home.dart';
 import 'package:cabriolet_sochi/src/features/home/presentation/pages/splash.dart';
 import 'package:cabriolet_sochi/src/features/orders/presentation/confirm_order.dart';
+import 'package:cabriolet_sochi/src/features/products/presentation/product_overview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -44,7 +45,7 @@ class _AppState extends State<App> {
         return MaterialApp(
           themeMode: ThemeMode.light,
           theme: ThemeData(
-            useMaterial3: true,
+            useMaterial3: Platform.isAndroid,
             inputDecorationTheme: const InputDecorationTheme(
               outlineBorder: BorderSide(
                 color: Colors.red,
@@ -64,24 +65,28 @@ class _AppState extends State<App> {
           home: child,
         );
       },
-      child: BlocBuilder<AppBloc, AppState>(
-        builder: (context, state) {
-          if (state is Authenticated) {
-            if (widget.uid != null && widget.uid!.isNotEmpty) {
-                print('user Id: $widget.uid');
-                return const SplashScreen();
-              }
-            else {
-              return const SignUpScreen();
-            }
-          } else if (state is UnAuthenticated) {
-            print('user Id: ${widget.uid}');
-            return const SplashScreen();
-          } else {
-            return Container();
-          }
-        },
-      ),
+      // child: BlocBuilder<AppBloc, AppState>(
+      //   builder: (context, state) {
+      //     if (state is Authenticated) {
+      //       if (widget.uid != null && widget.uid!.isNotEmpty) {
+      //           print('user Id: $widget.uid');
+      //           return const SplashScreen();
+      //         }
+      //       else {
+      //         return const SignUpScreen();
+      //       }
+      //     } else if (state is UnAuthenticated) {
+      //       print('user Id: ${widget.uid}');
+      //       return const SplashScreen();
+      //     } else {
+      //       return Container();
+      //     }
+      //   },
+      // ),
+      child: ConfirmOrderPage(carId: 1,),
+      // child: AuthenticationScreen(),
+      // child: SignUpScreen(),
+      // child: ProductOverview(index: 2),
       // child: HomePage(),
     );
   }

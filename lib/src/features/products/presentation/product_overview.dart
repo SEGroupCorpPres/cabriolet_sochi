@@ -149,7 +149,6 @@ class _ProductOverviewState extends State<ProductOverview> {
                             width: double.infinity,
                             child: Wrap(
                               alignment: WrapAlignment.spaceAround,
-                              // mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Padding(
                                   padding: EdgeInsets.only(bottom: 10.h),
@@ -203,7 +202,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                                             SizedBox(
                                               width: 130.w,
                                               child: ListView.builder(
-                                                physics: NeverScrollableScrollPhysics(),
+                                                physics: const NeverScrollableScrollPhysics(),
                                                 shrinkWrap: true,
                                                 itemCount: carModel[index!].engineDescription!.length,
                                                 itemBuilder: (context, item) {
@@ -226,7 +225,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                                             SizedBox(
                                               width: 130.w,
                                               child: ListView.builder(
-                                                physics: NeverScrollableScrollPhysics(),
+                                                physics: const NeverScrollableScrollPhysics(),
                                                 shrinkWrap: true,
                                                 itemCount: carModel[index!].fuelDescription!.length,
                                                 itemBuilder: (context, item) {
@@ -257,7 +256,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                                             SizedBox(
                                               width: 130.w,
                                               child: ListView.builder(
-                                                physics: NeverScrollableScrollPhysics(),
+                                                physics: const NeverScrollableScrollPhysics(),
                                                 shrinkWrap: true,
                                                 itemCount: carModel[index!].transmissionDescription!.length,
                                                 itemBuilder: (context, item) {
@@ -280,7 +279,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                                             SizedBox(
                                               width: 130.w,
                                               child: ListView.builder(
-                                                physics: NeverScrollableScrollPhysics(),
+                                                physics: const NeverScrollableScrollPhysics(),
                                                 shrinkWrap: true,
                                                 itemCount: carModel[index!].dimensions!.length,
                                                 itemBuilder: (context, item) {
@@ -317,7 +316,6 @@ class _ProductOverviewState extends State<ProductOverview> {
                       ),
                     ),
                     child: Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.start,
                       children: [
                         Text(
                           '${carModel[index!].rentalPrice!} ₽ в сутки',
@@ -375,12 +373,12 @@ class _ProductOverviewState extends State<ProductOverview> {
                       fontWeight: FontWeight.w400,
                       onTap: () => Navigator.of(context).push(
                         Platform.isIOS
-                            ? CupertinoPageRoute(
+                            ? CupertinoPageRoute<void>(
                                 builder: (_) => ConfirmOrderPage(
                                   carId: index,
                                 ),
                               )
-                            : MaterialPageRoute(
+                            : MaterialPageRoute<void>(
                                 builder: (_) => ConfirmOrderPage(
                                   carId: index,
                                 ),
@@ -404,12 +402,12 @@ class _ProductOverviewState extends State<ProductOverview> {
                       fontWeight: FontWeight.w400,
                       onTap: () => Navigator.of(context).push(
                         Platform.isIOS
-                            ? CupertinoPageRoute(
+                            ? CupertinoPageRoute<void>(
                                 builder: (_) => ConfirmOrderPage(
                                   carId: index,
                                 ),
                               )
-                            : MaterialPageRoute(
+                            : MaterialPageRoute<void>(
                                 builder: (_) => ConfirmOrderPage(
                                   carId: index,
                                 ),
@@ -436,7 +434,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                           ),
                         ),
                         ListView.builder(
-                          physics: NeverScrollableScrollPhysics(),
+                          physics: const NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                           itemCount: carModel[index!].package!.length,
                           itemBuilder: (BuildContext context, int item) {
@@ -467,7 +465,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                   Container(
                     width: ScreenUtil().screenWidth,
                     padding: const EdgeInsets.only(bottom: 30, right: 20, left: 20).r,
-                    height: 329.h,
+                    height: 290.h,
                     child: ListView.builder(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
@@ -476,21 +474,20 @@ class _ProductOverviewState extends State<ProductOverview> {
                         return GestureDetector(
                           onTap: () => Navigator.of(context).pushReplacement(
                             Platform.isIOS
-                                ? CupertinoPageRoute(
+                                ? CupertinoPageRoute<void>(
                                     builder: (_) => ProductOverview(
                                       index: index,
                                     ),
                                   )
-                                : MaterialPageRoute(
+                                : MaterialPageRoute<void>(
                                     builder: (_) => ProductOverview(
                                       index: index,
                                     ),
                                   ),
                           ),
                           child: Container(
-                            // constraints: const BoxConstraints.expand(),
                             margin: const EdgeInsets.only(right: 10, bottom: 40, left: 20).r,
-                            height: 280.h,
+                            height: 200.h,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15).r,
                               color: AppColors.secondColor,
@@ -540,7 +537,7 @@ class _ProductOverviewState extends State<ProductOverview> {
                                         child: SizedBox(
                                           width: 156.w,
                                           child: Text(
-                                            carModel[carIndex].description!,
+                                            '${carModel[carIndex].output!} л.с. ${carModel[carIndex].year} г.в.',
                                             softWrap: true,
                                             style: GoogleFonts.montserrat(
                                               fontSize: AppSizes.productName,

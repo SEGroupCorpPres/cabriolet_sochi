@@ -44,6 +44,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController _dateTextEditingController = TextEditingController();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   bool isVisible = true;
+  bool isOnTapCupertino = false;
   DateTime _date = DateTime.now();
   final DateTime _dateForAge = DateTime.now();
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
@@ -151,60 +152,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
             actions: <Widget>[
               CupertinoActionSheetAction(
                 onPressed: _getFromCamera,
-                child: const Text('Take Photo'),
+                child: const Text('Выбрать фото'),
               ),
               CupertinoActionSheetAction(
                 onPressed: _getFromGallery,
-                child: const Text('Choose Photo'),
+                child: const Text('Просмотр...'),
               ),
             ],
             cancelButton: CupertinoActionSheetAction(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const Text('Отменить'),
             ),
           );
         },
       );
-
-  Future<dynamic> _showCupertinoImageDialog() {
-    return showCupertinoDialog(
-      context: context,
-      builder: (context) {
-        return CupertinoAlertDialog(
-          title: Text(
-            'Пожалуйста, выберите опцию',
-            style: GoogleFonts.montserrat(),
-          ),
-          actions: [
-            CupertinoButton(
-              onPressed: _getFromCamera,
-              child: Row(
-                children: [
-                  const Icon(CupertinoIcons.camera),
-                  Text(
-                    'Камера',
-                    style: GoogleFonts.montserrat(),
-                  )
-                ],
-              ),
-            ),
-            CupertinoButton(
-              onPressed: _getFromGallery,
-              child: Row(
-                children: [
-                  const Icon(CupertinoIcons.photo_fill_on_rectangle_fill),
-                  Text(
-                    'Галерея',
-                    style: GoogleFonts.montserrat(),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   Future<dynamic> _showMaterialImageDialog() {
     return showDialog(
@@ -263,11 +224,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Future<void> _cupertinoDatePicker() async {
-    Container(
+  Future<dynamic> showCupertinoSheet(
+    BuildContext context, {
+    required Widget child,
+    required VoidCallback onClicked,
+        required String text,
+  }) =>
+      showCupertinoModalPopup(
+        context: context,
+        builder: (context) => CupertinoActionSheet(
+          actions: [
+            child,
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: onClicked,
+            child: Text(
+              text,
+              style: GoogleFonts.montserrat(),
+            ),
+          ),
+        ),
+      );
+
+  Widget cupertinoDatePicker(double bR) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(bR),
+        color: Colors.white,
+      ),
       height: 100.h,
-      color: Colors.white,
       child: CupertinoDatePicker(
+        dateOrder: DatePickerDateOrder.dmy,
         mode: CupertinoDatePickerMode.date,
         onDateTimeChanged: (date) {
           if (date != _date) {
@@ -281,7 +268,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
         maximumDate: DateTime(_dateForAge.year - 27, 12, 31),
       ),
     );
-    print('cupertino');
+  }
+
+  Future<void> _buildCupertinoDatePicker() async {
+    await showCupertinoSheet(
+      context,
+      text: 'Сохранить',
+      child: cupertinoDatePicker(8),
+      onClicked: () => Navigator.pop(context),
+    );
   }
 
   Future<void> _materialDatePicker() async {
@@ -338,8 +333,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
     if (date != _date) {
       setState(() {
-        _date = date!;
-        _dateTextEditingController.text = _dateFormat.format(date);
+        _date = date ?? DateTime.now();
+        _dateTextEditingController.text = _dateFormat.format(date!);
       });
     }
     print(_date);
@@ -513,7 +508,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     widget: null,
                     title: 'Загрузить фотографию',
                     borderWidth: 1.5,
-                    height: 35.h,
+                    height: 35,
                     width: MediaQuery.of(context).size.width,
                     borderColor: AppColors.mainColor,
                     titleColor: AppColors.mainColor,
@@ -521,7 +516,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     fontSize: AppSizes.mainButtonText,
                     fontWeight: FontWeight.w400,
                     onTap: () {
-                      Platform.isIOS ? _showCupertinoImageDialog() : _showMaterialImageDialog();
+                      Platform.isIOS ? _iosBottomSheet() : _showMaterialImageDialog();
                     },
                     borderRadius: 8,
                   ),
@@ -540,12 +535,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             labelColor: AppColors.labelColor,
                             marginContainer: 10,
                             width: MediaQuery.of(context).size.width,
-                            height: 35.h,
+                            height: 35,
                             bgColor: const Color(0xffFFE0E0),
                             borderR: 8,
                             keyboardType: TextInputType.emailAddress,
                             border: InputBorder.none,
                             errorText: _emailTextEditingController.text.isEmpty ? 'Электронная почта не должны быть пустыми' : null,
+                            visible: _emailTextEditingController.text.length < 2,
                             contentPaddingHorizontal: 15,
                             onChanged: (String? value) {},
                             obscureText: false,
@@ -559,7 +555,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             marginContainer: 10,
                             width: MediaQuery.of(context).size.width,
                             obscureText: isVisible,
-                            height: 35.h,
+                            height: 35,
                             bgColor: const Color(0xffFFE0E0),
                             borderR: 8,
                             keyboardType: TextInputType.text,
@@ -568,6 +564,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             contentPaddingHorizontal: 15,
                             icon: isVisible ? 'assets/icons/profile/eye_off.svg' : 'assets/icons/profile/eye.svg',
                             size: 20,
+                            visible: _passwordTextEditingController.text.length < 2,
                             onChanged: (String? value) {},
                             onPressed: () {
                               setState(() {
@@ -584,12 +581,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             labelColor: AppColors.labelColor,
                             marginContainer: 10,
                             width: MediaQuery.of(context).size.width,
-                            height: 35.h,
+                            height: 35,
                             bgColor: const Color(0xffFFE0E0),
                             borderR: 8,
                             keyboardType: TextInputType.text,
                             border: InputBorder.none,
                             errorText: _nameTextEditingController.text.isEmpty ? 'Фамилия и Имя не должны быть пустыми' : null,
+                            visible: _nameTextEditingController.text.length < 2,
                             contentPaddingHorizontal: 15,
                             onChanged: (String? value) {},
                             obscureText: false,
@@ -603,7 +601,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             labelColor: AppColors.labelColor,
                             marginContainer: 10,
                             width: MediaQuery.of(context).size.width,
-                            height: 35.h,
+                            height: 35,
                             bgColor: const Color(0xffFFE0E0),
                             borderR: 8,
                             keyboardType: TextInputType.phone,
@@ -615,6 +613,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ? 'Номер телефона должен состоять из 7 цифр.'
                                     : null,
                             onChanged: (String? value) {},
+                            visible: _passwordTextEditingController.text.length < 2,
                           ),
                           MainTextFormField(
                             obscureText: false,
@@ -625,15 +624,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             labelColor: AppColors.labelColor,
                             marginContainer: 10,
                             width: MediaQuery.of(context).size.width,
-                            height: 35.h,
+                            height: 35,
                             bgColor: const Color(0xffFFE0E0),
                             borderR: 8,
-                            onTap: Platform.isIOS ? _cupertinoDatePicker : _materialDatePicker,
+                            onTap: Platform.isIOS ? _buildCupertinoDatePicker : _materialDatePicker,
                             keyboardType: TextInputType.text,
                             border: InputBorder.none,
                             contentPaddingHorizontal: 15,
                             errorText: _dateTextEditingController.text.isEmpty ? 'Дата рождения не может быть пустой' : null,
                             onChanged: (String? value) {},
+                            visible: _dateTextEditingController.text.length < 2,
                           ),
                         ],
                       ),
@@ -665,7 +665,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     widget: null,
                     title: 'Сохранить',
                     borderWidth: 0,
-                    height: 40.h,
+                    height: 40,
                     width: MediaQuery.of(context).size.width,
                     borderColor: Colors.transparent,
                     titleColor: Colors.white,

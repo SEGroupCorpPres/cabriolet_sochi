@@ -62,6 +62,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
   int orderId = 0;
   DateTime _date = DateTime.now();
   TimeOfDay _time = TimeOfDay.now();
+  DateTime _timeCupertino = DateTime.now();
   DateTime? dateFrom;
   DateTime? dateTo;
   late List<int> date1 = [];
@@ -232,53 +233,96 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
     }
   }
 
-  Future<void> _cupertinoDatePicker({
-    required TextEditingController dateTextEditingController,
-  }) async {
-    Container(
+  Future<dynamic> showCupertinoSheet(
+    BuildContext context, {
+    required Widget child,
+    required VoidCallback onClicked,
+    required String text,
+  }) =>
+      showCupertinoModalPopup(
+        context: context,
+        builder: (context) => CupertinoActionSheet(
+          actions: [
+            child,
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: onClicked,
+            child: Text(
+              text,
+              style: GoogleFonts.montserrat(),
+            ),
+          ),
+        ),
+      );
+
+  Widget cupertinoDatePicker(double bR, TextEditingController textEditingController) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(bR),
+        color: Colors.white,
+      ),
       height: 100.h,
-      color: Colors.white,
       child: CupertinoDatePicker(
+        dateOrder: DatePickerDateOrder.dmy,
         mode: CupertinoDatePickerMode.date,
         onDateTimeChanged: (date) {
           if (date != _date) {
             _date = date;
-            dateTextEditingController.text = _dateFormat.format(date);
+            textEditingController.text = _dateFormat.format(date);
           }
-          if (kDebugMode) {
-            print(_date);
-          }
+          print(_date);
         },
-        initialDateTime: DateTime(_date.year),
+        initialDateTime: DateTime.now(),
         minimumYear: DateTime.now().year,
-        maximumDate: DateTime(2040),
+        maximumDate: DateTime(2100),
       ),
     );
-    if (kDebugMode) {
-      print('cupertino');
-    }
   }
 
-  Future<void> _cupertinoTimePicker({
-    required TextEditingController timeTextEditingController,
-  }) async {
-    Container(
+  Widget cupertinoTimePicker(double bR, TextEditingController textEditingController) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(bR),
+        color: Colors.white,
+      ),
       height: 100.h,
-      color: Colors.white,
-      child: CupertinoTimerPicker(
-        mode: CupertinoTimerPickerMode.hm,
-        onTimerDurationChanged: (time) {
-          _time = time as TimeOfDay;
-          timeTextEditingController.text = time as String;
+      child: CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.time,
+        initialDateTime: DateTime.now(),
+        use24hFormat: true,
+        onDateTimeChanged: (time) {
+          _timeCupertino = time;
+          textEditingController.text = time.hour < 10 && time.minute < 10
+              ? '0${time.hour}:0${time.minute}'
+              : time.minute < 10
+                  ? '${time.hour}:0${time.minute}'
+                  : time.hour < 10
+                      ? '0${time.hour}:${time.minute}'
+                      : '${time.hour}:${time.minute}';
           if (kDebugMode) {
-            print(_date);
+            print(_timeCupertino);
           }
         },
       ),
     );
-    if (kDebugMode) {
-      print('cupertino');
-    }
+  }
+
+  Future<void> _buildCupertinoDatePicker(TextEditingController textEditingController) async {
+    await showCupertinoSheet(
+      context,
+      text: 'Сохранить',
+      child: cupertinoDatePicker(8, textEditingController),
+      onClicked: () => Navigator.pop(context),
+    );
+  }
+
+  Future<void> _buildCupertinoTimePicker(TextEditingController textEditingController) async {
+    await showCupertinoSheet(
+      context,
+      text: 'Сохранить',
+      child: cupertinoTimePicker(8, textEditingController),
+      onClicked: () => Navigator.pop(context),
+    );
   }
 
   Future<void> _materialDatePicker({
@@ -466,10 +510,11 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                   bottom: 5,
                   left: 5,
                   top: 10,
-                  right: 25,
+                  right: 5,
                 ).r,
                 child: Form(
                   key: _formKey,
+                  autovalidateMode: AutovalidateMode.disabled,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -488,78 +533,92 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Flexible(
-                            child: MainTextFormField(
-                              textEditingController: date1TextEditingController,
-                              horizontalPadding: 10,
-                              label: '',
-                              labelFontSize: AppSizes.mainButtonText,
-                              labelColor: AppColors.textColor,
-                              marginContainer: 0,
-                              width: 200,
-                              height: 35.h,
-                              bgColor: Colors.transparent,
-                              borderR: 10,
-                              size: 20,
-                              obscureText: false,
-                              keyboardType: TextInputType.text,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10).r,
-                                borderSide: const BorderSide(
-                                  color: Colors.grey,
+                            child: SizedBox(
+                              height: 65.h,
+                              child: MainTextFormField(
+                                textEditingController: date1TextEditingController,
+                                horizontalPadding: 10,
+                                label: '',
+                                labelFontSize: AppSizes.mainButtonText,
+                                labelColor: AppColors.textColor,
+                                marginContainer: 0,
+                                width: 200,
+                                height: 35,
+                                bgColor: Colors.transparent,
+                                borderR: 10,
+                                size: 20,
+                                focusedBorderColor: AppColors.mainColor,
+                                enableBorderColor: AppColors.mainColor,
+                                errorBorderColor: Colors.red,
+                                obscureText: false,
+                                keyboardType: TextInputType.text,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10).r,
+                                  borderSide: const BorderSide(
+                                    color: Colors.grey,
+                                  ),
                                 ),
+                                onTap: () {
+                                  Platform.isIOS
+                                      ? _buildCupertinoDatePicker(
+                                          date1TextEditingController,
+                                        )
+                                      : _materialDatePicker(
+                                          dateTextEditingController: date1TextEditingController,
+                                          dateForComparison: date1,
+                                        );
+                                },
+                                hintText: '23/01/2023',
+                                icon: 'assets/icons/pay/calendar.svg',
+                                contentPaddingHorizontal: 10,
+                                errorText: date1TextEditingController.text.isEmpty ? 'Поле не может быть пустым!' : null,
+                                onChanged: (String? value) {},
+                                visible: date1TextEditingController.value.text.length < 2,
                               ),
-                              // border: InputBorder.none,
-                              onTap: () {
-                                Platform.isIOS
-                                    ? _cupertinoDatePicker(
-                                        dateTextEditingController: date1TextEditingController,
-                                      )
-                                    : _materialDatePicker(
-                                        dateTextEditingController: date1TextEditingController,
-                                        dateForComparison: date1,
-                                      );
-                              },
-                              hintText: '23/01/2023',
-                              icon: 'assets/icons/pay/calendar.svg',
-                              contentPaddingHorizontal: 10,
-                              errorText: date1TextEditingController.text.isEmpty ? 'Поле не может быть пустым!' : null,
-                              onChanged: (String? value) {},
                             ),
                           ),
                           Flexible(
-                            child: MainTextFormField(
-                              obscureText: false,
-                              textEditingController: time1TextEditingController,
-                              horizontalPadding: 10,
-                              label: '',
-                              labelFontSize: AppSizes.mainButtonText,
-                              labelColor: AppColors.textColor,
-                              marginContainer: 0,
-                              width: 200.w,
-                              height: 35.h,
-                              size: 20,
-                              bgColor: AppColors.secondColor,
-                              borderR: 10,
-                              keyboardType: TextInputType.datetime,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                  color: Colors.grey,
+                            child: SizedBox(
+                              height: 65.h,
+                              child: MainTextFormField(
+                                obscureText: false,
+                                textEditingController: time1TextEditingController,
+                                horizontalPadding: 10,
+                                label: '',
+                                labelFontSize: AppSizes.mainButtonText,
+                                labelColor: AppColors.textColor,
+                                marginContainer: 0,
+                                width: 200,
+                                height: 35,
+                                size: 20,
+                                focusedBorderColor: AppColors.mainColor,
+                                enableBorderColor: AppColors.mainColor,
+                                errorBorderColor: Colors.red,
+                                bgColor: AppColors.secondColor,
+                                borderR: 10,
+                                keyboardType: TextInputType.datetime,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                    color: Colors.grey,
+                                  ),
                                 ),
+                                onTap: () {
+                                  Platform.isIOS
+                                      ? _buildCupertinoTimePicker(time1TextEditingController)
+                                      : _materialTimePicker(
+                                          timeTextEditingController: time1TextEditingController,
+                                          timeForComparison: time1,
+                                        );
+                                },
+                                hintText: '12:00',
+                                icon: 'assets/icons/pay/timer.svg',
+                                contentPaddingHorizontal: 10,
+                                errorText: time1TextEditingController.text.isEmpty ? 'Поле не может быть пустым!' : null,
+                                onChanged: (String? value) {},
+                                visible: date1TextEditingController.value.text.length < 2,
+
                               ),
-                              onTap: () {
-                                Platform.isIOS
-                                    ? _cupertinoTimePicker(timeTextEditingController: time1TextEditingController)
-                                    : _materialTimePicker(
-                                        timeTextEditingController: time1TextEditingController,
-                                        timeForComparison: time1,
-                                      );
-                              },
-                              hintText: '12:00',
-                              icon: 'assets/icons/pay/timer.svg',
-                              contentPaddingHorizontal: 10,
-                              errorText: time1TextEditingController.text.isEmpty ? 'Поле не может быть пустым!' : null,
-                              onChanged: (String? value) {},
                             ),
                           ),
                         ],
@@ -579,75 +638,91 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Flexible(
-                            child: MainTextFormField(
-                              obscureText: false,
-                              textEditingController: date2TextEditingController,
-                              horizontalPadding: 10,
-                              label: '',
-                              labelFontSize: AppSizes.mainButtonText,
-                              labelColor: AppColors.textColor,
-                              marginContainer: 0,
-                              width: 200.w,
-                              height: 35.h,
-                              bgColor: AppColors.secondColor,
-                              borderR: 10,
-                              size: 20,
-                              keyboardType: TextInputType.datetime,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10).r,
-                                borderSide: const BorderSide(
-                                  color: Colors.grey,
+                            child: SizedBox(
+                              height: 65.h,
+                              child: MainTextFormField(
+                                obscureText: false,
+                                textEditingController: date2TextEditingController,
+                                horizontalPadding: 10,
+                                label: '',
+                                labelFontSize: AppSizes.mainButtonText,
+                                labelColor: AppColors.textColor,
+                                marginContainer: 0,
+                                width: 200,
+                                height: 35,
+                                bgColor: AppColors.secondColor,
+                                borderR: 10,
+                                size: 20,
+                                focusedBorderColor: AppColors.mainColor,
+                                enableBorderColor: AppColors.mainColor,
+                                errorBorderColor: Colors.red,
+                                keyboardType: TextInputType.datetime,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10).r,
+                                  borderSide: const BorderSide(
+                                    color: Colors.grey,
+                                  ),
                                 ),
+                                onTap: () {
+                                  Platform.isIOS
+                                      ? _buildCupertinoDatePicker(date2TextEditingController)
+                                      : _materialDatePicker(
+                                          dateTextEditingController: date2TextEditingController,
+                                          dateForComparison: date2,
+                                        );
+                                },
+                                hintText: '23/01/2023',
+                                icon: 'assets/icons/pay/calendar.svg',
+                                contentPaddingHorizontal: 10,
+                                errorText: date2TextEditingController.text.isEmpty ? 'Поле не может быть пустым!' : null,
+                                onChanged: (String? value) {},
+                                visible: date1TextEditingController.value.text.length < 2,
+
                               ),
-                              onTap: () {
-                                Platform.isIOS
-                                    ? _cupertinoDatePicker(dateTextEditingController: date2TextEditingController)
-                                    : _materialDatePicker(
-                                        dateTextEditingController: date2TextEditingController,
-                                        dateForComparison: date2,
-                                      );
-                              },
-                              hintText: '23/01/2023',
-                              icon: 'assets/icons/pay/calendar.svg',
-                              contentPaddingHorizontal: 10,
-                              errorText: date2TextEditingController.text.isEmpty ? 'Поле не может быть пустым!' : null,
-                              onChanged: (String? value) {},
                             ),
                           ),
                           Flexible(
-                            child: MainTextFormField(
-                              obscureText: false,
-                              textEditingController: time2TextEditingController,
-                              horizontalPadding: 10,
-                              label: '',
-                              labelFontSize: AppSizes.mainButtonText,
-                              labelColor: AppColors.textColor,
-                              marginContainer: 0,
-                              width: 200.w,
-                              height: 35.h,
-                              bgColor: AppColors.secondColor,
-                              borderR: 10,
-                              size: 20,
-                              keyboardType: TextInputType.datetime,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10).r,
-                                borderSide: const BorderSide(
-                                  color: Colors.grey,
+                            child: SizedBox(
+                              height: 65.h,
+                              child: MainTextFormField(
+                                obscureText: false,
+                                textEditingController: time2TextEditingController,
+                                horizontalPadding: 10,
+                                label: '',
+                                labelFontSize: AppSizes.mainButtonText,
+                                labelColor: AppColors.textColor,
+                                marginContainer: 0,
+                                width: 200,
+                                height: 35,
+                                bgColor: AppColors.secondColor,
+                                borderR: 10,
+                                size: 20,
+                                focusedBorderColor: AppColors.mainColor,
+                                enableBorderColor: AppColors.mainColor,
+                                errorBorderColor: Colors.red,
+                                keyboardType: TextInputType.datetime,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10).r,
+                                  borderSide: const BorderSide(
+                                    color: Colors.grey,
+                                  ),
                                 ),
+                                onTap: () {
+                                  Platform.isIOS
+                                      ? _buildCupertinoTimePicker(time2TextEditingController)
+                                      : _materialTimePicker(
+                                          timeTextEditingController: time2TextEditingController,
+                                          timeForComparison: time2,
+                                        );
+                                },
+                                hintText: '12:00',
+                                icon: 'assets/icons/pay/timer.svg',
+                                contentPaddingHorizontal: 10,
+                                errorText: time2TextEditingController.text.isEmpty ? 'Поле не может быть пустым!' : null,
+                                onChanged: (String? value) {},
+                                visible: date1TextEditingController.value.text.length < 2,
+
                               ),
-                              onTap: () {
-                                Platform.isIOS
-                                    ? _cupertinoTimePicker(timeTextEditingController: time2TextEditingController)
-                                    : _materialTimePicker(
-                                        timeTextEditingController: time2TextEditingController,
-                                        timeForComparison: time2,
-                                      );
-                              },
-                              hintText: '12:00',
-                              icon: 'assets/icons/pay/timer.svg',
-                              contentPaddingHorizontal: 10,
-                              errorText: time2TextEditingController.text.isEmpty ? 'Поле не может быть пустым!' : null,
-                              onChanged: (String? value) {},
                             ),
                           ),
                         ],
@@ -672,11 +747,13 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                         labelColor: AppColors.textColor,
                         marginContainer: 0,
                         width: MediaQuery.of(context).size.width,
-                        height: 35.h,
+                        height: 35,
                         bgColor: AppColors.secondColor,
                         borderR: 10,
                         keyboardType: TextInputType.streetAddress,
-                        errorText: '',
+                        focusedBorderColor: AppColors.mainColor,
+                        enableBorderColor: AppColors.mainColor,
+                        errorBorderColor: Colors.red,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10).r,
                           borderSide: const BorderSide(
@@ -706,17 +783,19 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                         labelColor: AppColors.textColor,
                         marginContainer: 0,
                         width: MediaQuery.of(context).size.width,
-                        height: 35.h,
+                        height: 35,
                         bgColor: AppColors.secondColor,
                         borderR: 10,
+                        focusedBorderColor: AppColors.mainColor,
+                        enableBorderColor: AppColors.mainColor,
+                        errorBorderColor: Colors.red,
                         keyboardType: TextInputType.streetAddress,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10).r,
                           borderSide: const BorderSide(
-                            color: Colors.grey,
+                            color: Colors.blue,
                           ),
                         ),
-                        errorText: '',
                         contentPaddingHorizontal: 10,
                         onChanged: (String? value) {},
                       ),
@@ -742,7 +821,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
                       return MainButton(
                         title: 'Забронировать авто',
                         borderWidth: 0,
-                        height: 37.h,
+                        height: 37,
                         width: MediaQuery.of(context).size.width,
                         borderColor: Colors.transparent,
                         titleColor: Colors.white,
