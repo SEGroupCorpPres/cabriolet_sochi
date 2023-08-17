@@ -208,9 +208,9 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
       final email = Email(
         body: 'Информация, предоставленная пользователем fullName для аренды и возврата автомобиля $carName',
         subject: 'Договор аренды кабриолета',
-        recipients: <String>['cabrioletsochi2012@yandex.ru'],
+        // recipients: <String>['cabrioletsochi2012@yandex.ru'],
         // recipients: <String> ['vladislav.vulf@gmail.com'],
-        // recipients: <String>['artessdu@gmail.com'],
+        recipients: <String>['artessdu@gmail.com'],
         attachmentPaths: [fileName],
       );
 

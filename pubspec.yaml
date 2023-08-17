@@ -48,7 +48,6 @@ dependencies:
   firebase_analytics: ^10.1.0
   cloud_firestore: ^4.3.1
   formz: ^0.4.1
-  google_fonts: ^3.0.1
   meta: ^1.8.0
   intl: ^0.17.0
   flow_builder: ^0.0.9
@@ -59,7 +58,7 @@ dependencies:
   country_code_picker: ^2.0.2
   shared_preferences: ^2.0.16
   sqflite: ^2.2.3
-  flutter_screenutil: ^5.6.0
+  flutter_screenutil: ^5.8.4
   flutterfire_cli: ^0.2.7
   timer_count_down: ^2.2.2
   async: ^2.9.0
@@ -71,6 +70,7 @@ dependencies:
   open_file: ^3.2.1
   permission_handler: ^10.2.0
   easy_mask: ^2.0.1
+  google_fonts: ^4.0.1
   http: ^0.13.5
   pull_to_refresh: ^2.0.0
   cached_network_image: ^3.2.1
@@ -79,6 +79,8 @@ dependencies:
   mask_text_input_formatter: ^2.4.0
   url_launcher: ^6.1.10
   flutter_email_sender:
+  intl_phone_number_input: ^0.7.3+1
+  intl_phone_field: ^3.2.0
 
 dev_dependencies:
   bloc_test: ^9.1.1

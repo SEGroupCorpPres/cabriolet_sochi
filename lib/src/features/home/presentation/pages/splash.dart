@@ -46,19 +46,22 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (uid!.length > 3) {
-      Future.delayed(const Duration(milliseconds: 1500), () {
-        Navigator.of(context).pushReplacement(
-          Platform.isIOS
-              ? CupertinoPageRoute<void>(
-                  builder: (_) => const AccountPage(),
-                )
-              : MaterialPageRoute<void>(
-                  builder: (_) => const AccountPage(),
-                ),
-        );
-      });
+    if (uid != null) {
+      if (uid!.length > 3) {
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          Navigator.of(context).pushReplacement(
+            Platform.isIOS
+                ? CupertinoPageRoute<void>(
+              builder: (_) => const AccountPage(),
+            )
+                : MaterialPageRoute<void>(
+              builder: (_) => const AccountPage(),
+            ),
+          );
+        });
+      }
     }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: DecoratedBox(

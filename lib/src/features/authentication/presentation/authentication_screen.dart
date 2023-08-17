@@ -6,17 +6,19 @@ import 'package:cabriolet_sochi/src/features/authentication/bloc/authentication_
 import 'package:cabriolet_sochi/src/features/authentication/presentation/authentication_confirm.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/app_bar_title.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/main_button.dart';
-import 'package:cabriolet_sochi/src/utils/widgets/main_text_form_field.dart';
-import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Authentication Screen
 class AuthenticationScreen extends StatefulWidget {
+  /// Constructor for the Authentication Screen
   const AuthenticationScreen({super.key});
 
   static Route<void> route() {
@@ -37,16 +39,19 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
   late bool isChecked = false;
   final _navigatorKey = GlobalKey<NavigatorState>();
   late bool isPhoneNumberSent = false;
-  final _text = '';
+  String _text = '';
+  String initialCountry = 'RU';
+  PhoneNumber number = PhoneNumber(isoCode: 'RU');
 
   NavigatorState get _navigator => _navigatorKey.currentState!;
+  FocusNode focusNode = FocusNode();
 
   String? get _errorText {
     // at any time, we can get the text from _controller.value.text
     final text = phoneTextEditingController.value.text;
     // Note: you can do your own custom validation here
     // Move this logic this outside the widget for more testable code
-    if (text.length == 1) {
+    if (text.length == 4) {
       return 'Область не может быть пустой';
     }
     if (text.length < 7) {
@@ -56,11 +61,18 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
     return null;
   }
 
+  Future<void> getPhoneNumber(String phoneNumber) async {
+    final number = await PhoneNumber.getRegionInfoFromPhoneNumber(phoneNumber, 'RU');
+
+    setState(() {
+      this.number = number;
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     phoneTextEditingController = TextEditingController();
-    phoneTextEditingController.text += '+';
     super.initState();
   }
 
@@ -70,11 +82,15 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
     phoneTextEditingController.dispose();
     super.dispose();
   }
+  void _unfocusTextFormField() {
+    FocusScope.of(context).unfocus();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: AppBarTitle(
           title: 'Вход/Регистрация',
           fontWeight: FontWeight.w800,
@@ -138,11 +154,11 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
               ScaffoldMessenger.of(context)
                 ..hideCurrentSnackBar()
                 ..showSnackBar(
-                  SnackBar(
+                  const SnackBar(
                     backgroundColor: Colors.green,
                     content: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
+                      children: [
                         Text('OTP отправлен...'),
                         Icon(Icons.check),
                       ],
@@ -185,41 +201,61 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                       return Form(
                         key: formKey,
                         autovalidateMode: AutovalidateMode.disabled,
-                        child: Column(
-                          children: [
-                            MainTextFormField(
-                              horizontalPadding: 20,
-                              label: 'Номер телефона',
-                              labelFontSize: AppSizes.mainLabel,
-                              labelColor: AppColors.labelColor,
-                              marginContainer: 10,
-                              width: MediaQuery.of(context).size.width,
-                              bgColor: const Color(0xffEBF7EE),
-                              borderR: 8,
-                              height: 35,
-                              obscureText: false,
-                              keyboardType: TextInputType.phone,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                borderSide: BorderSide(
-
-                                )
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20.w),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    'Номер телефона',
+                                    textAlign: TextAlign.left,
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: AppSizes.label,
+                                      color: AppColors.labelColor,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              contentPaddingHorizontal: 20,
-                              inputFormatters: [
-                                TextInputMask(
-                                  mask: r'\+ 999 (99) 999 99 99',
-                                  placeholder: '_ ',
-                                  maxPlaceHolders: 13,
+                              SizedBox(height: 10.h),
+                              DecoratedBox(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Color(0xFFEBF7EE),
                                 ),
-                              ],
-                              textEditingController: phoneTextEditingController,
-                              onChanged: (text) => setState(() => _text),
-                              errorText: _errorText,
-                              visible: phoneTextEditingController.value.text.length < 2,
-                            ),
-
-                          ],
+                                child: InternationalPhoneNumberInput(
+                                  focusNode: focusNode,
+                                  onInputValidated: (bool value) {
+                                  },
+                                  locale: 'ru',
+                                  hintText: 'Номер телефона',
+                                  onInputChanged: (PhoneNumber text) {
+                                    setState(() {
+                                      _text = text.phoneNumber!;
+                                    });
+                                    print(_text);
+                                  },
+                                  spaceBetweenSelectorAndTextField: 0,
+                                  selectorConfig: SelectorConfig(
+                                    selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                                    setSelectorButtonAsPrefixIcon: true,
+                                    trailingSpace: false,
+                                    leadingPadding: 20.r,
+                                  ),
+                                  errorMessage: _errorText,
+                                  textStyle: TextStyle(color: Colors.black, fontSize: 20.sp,),
+                                  selectorTextStyle: TextStyle(color: Colors.black, fontSize: 20.sp),
+                                  initialValue: number,
+                                  textFieldController: phoneTextEditingController,
+                                  inputBorder: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -235,6 +271,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                           focusColor: AppColors.secondColor.withOpacity(0.4),
                           value: isChecked,
                           onChanged: (value) {
+                            _unfocusTextFormField();
                             setState(() {
                               isChecked = value!;
                             });
@@ -287,14 +324,14 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                         onTap: () async {
                           if (formKey.currentState!.validate()) {
                             if (isChecked) {
-                              context.read<AuthenticationCubit>().phoneNumberChanged(phoneTextEditingController.text);
+                              context.read<AuthenticationCubit>().phoneNumberChanged(_text);
                               await context.read<AuthenticationCubit>().sendOtp();
                               Future.delayed(Duration.zero, () {
                                 isPhoneNumberSent = true;
                               });
                             }
                             final preferences = await SharedPreferences.getInstance();
-                            await preferences.setString('phone', phoneTextEditingController.text);
+                            await preferences.setString('phone', _text);
                           }
                         },
                         borderRadius: 10,

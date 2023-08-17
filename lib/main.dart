@@ -22,6 +22,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  Bloc.observer = AppBlocObserver();
+
   await OrderNotificationService().init();
   final prefs = await SharedPreferences.getInstance();
   final uid = prefs.getString('uid') ?? '';
@@ -35,64 +37,61 @@ Future<void> main() async {
   final dateList = prefs.getStringList('date2') ?? [''];
   final carName = prefs.getString('carName') ?? '';
   final isNotify = prefs.getBool('isNotify') ?? false;
-  if (isNotify) {
-    if (orderId != null && carName.isNotEmpty && dateList.isNotEmpty && dateList.length > 2 && userImgUrl.isNotEmpty && carImgUrl.isNotEmpty) {
-      await OrderNotificationService().showScheduleNotification(
-        id: orderId,
-        title: 'Внимание!!!',
-        body: 'Аренда вашего автомобиля $carName до ${dateList[0]}.${dateList[1]}.${dateList[2]} ${dateList[3]}:${dateList[4]} заканчивается через 1 час',
-        dateTime: DateTime(
-          int.tryParse(dateList[0])!,
-          int.tryParse(dateList[1])!,
-          int.tryParse(dateList[2])!,
-          (int.tryParse(dateList[3]))! - 1,
-          int.tryParse(dateList[4])!,
-        ),
-        seconds: 3,
-        userImgUrl: userImgUrl,
-        carImgUrl: carImgUrl,
-      );
-    }
-  }
-  BlocOverrides.runZoned(
-    () => runApp(
-      MultiBlocProvider(
-        providers: [
-          BlocProvider<AppBloc>(
-            create: (context) => AppBloc(authenticationRepository)
-              ..add(
-                IsAuthenticated(),
-              ),
-          ),
-          BlocProvider<AuthenticationCubit>(
-            create: (context) => AuthenticationCubit(),
-          ),
-          BlocProvider<AccountBloc>(
-            create: (context) => AccountBloc(
-              accountRepository: accountRepository,
+  // if (isNotify) {
+  //   if (orderId != null && carName.isNotEmpty && dateList.isNotEmpty && dateList.length > 2 && userImgUrl.isNotEmpty && carImgUrl.isNotEmpty) {
+  //     await OrderNotificationService().showScheduleNotification(
+  //       id: orderId,
+  //       title: 'Внимание!!!',
+  //       body: 'Аренда вашего автомобиля $carName до ${dateList[0]}.${dateList[1]}.${dateList[2]} ${dateList[3]}:${dateList[4]} заканчивается через 1 час',
+  //       dateTime: DateTime(
+  //         int.tryParse(dateList[0])!,
+  //         int.tryParse(dateList[1])!,
+  //         int.tryParse(dateList[2])!,
+  //         (int.tryParse(dateList[3]))! - 1,
+  //         int.tryParse(dateList[4])!,
+  //       ),
+  //       seconds: 3,
+  //       userImgUrl: userImgUrl,
+  //       carImgUrl: carImgUrl,
+  //     );
+  //   }
+  // }
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider<AppBloc>(
+          create: (context) => AppBloc(authenticationRepository)
+            ..add(
+              IsAuthenticated(),
             ),
-          ),
-          BlocProvider<HomeBloc>(
-            create: (context) => HomeBloc(
-              carRepository: carRepository,
-            )
-              ..add(LoadFilter())
-              ..add(LoadFilterButtonHeight()),
-          ),
-          BlocProvider<OrdersCubit>(
-            create: (context) => OrdersCubit(),
-          ),
-          BlocProvider<CartBloc>(
-            create: (context) => CartBloc(
-              cartRepository: cartRepository,
-            ),
-          ),
-        ],
-        child: App(
-          uid: uid,
         ),
+        BlocProvider<AuthenticationCubit>(
+          create: (context) => AuthenticationCubit(),
+        ),
+        BlocProvider<AccountBloc>(
+          create: (context) => AccountBloc(
+            accountRepository: accountRepository,
+          ),
+        ),
+        BlocProvider<HomeBloc>(
+          create: (context) => HomeBloc(
+            carRepository: carRepository,
+          )
+            ..add(LoadFilter())
+            ..add(LoadFilterButtonHeight()),
+        ),
+        BlocProvider<OrdersCubit>(
+          create: (context) => OrdersCubit(),
+        ),
+        BlocProvider<CartBloc>(
+          create: (context) => CartBloc(
+            cartRepository: cartRepository,
+          ),
+        ),
+      ],
+      child: App(
+        uid: uid,
       ),
     ),
-    blocObserver: AppBlocObserver(),
   );
 }
