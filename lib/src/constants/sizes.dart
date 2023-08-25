@@ -1,5 +1,6 @@
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+/// Sizes of the usage
 class AppSizes {
   static double title = 20.sp;
   static double mainButtonText = 14.sp;

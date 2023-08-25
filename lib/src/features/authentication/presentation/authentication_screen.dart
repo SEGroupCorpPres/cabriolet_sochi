@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -222,7 +221,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
                               DecoratedBox(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
-                                  color: Color(0xFFEBF7EE),
+                                  color: const Color(0xFFEBF7EE),
                                 ),
                                 child: InternationalPhoneNumberInput(
                                   focusNode: focusNode,

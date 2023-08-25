@@ -8,7 +8,8 @@ import 'package:cabriolet_sochi/src/features/authentication/bloc/authentication_
 import 'package:cabriolet_sochi/src/features/authentication/domain/repositories/authentication_repository.dart';
 import 'package:cabriolet_sochi/src/features/cart/bloc/cart_bloc.dart';
 import 'package:cabriolet_sochi/src/features/cart/domain/repositories/cart_repository.dart';
-import 'package:cabriolet_sochi/src/features/home/bloc/home_bloc.dart';
+import 'package:cabriolet_sochi/src/features/home/bloc/car_list/car_list_bloc.dart';
+import 'package:cabriolet_sochi/src/features/home/bloc/filter/filter_bloc.dart';
 import 'package:cabriolet_sochi/src/features/home/domain/repositories/car_repository.dart';
 import 'package:cabriolet_sochi/src/features/orders/cubit/orders_cubit.dart';
 import 'package:cabriolet_sochi/src/utils/services/order_notification.dart';
@@ -73,12 +74,15 @@ Future<void> main() async {
             accountRepository: accountRepository,
           ),
         ),
-        BlocProvider<HomeBloc>(
-          create: (context) => HomeBloc(
+        BlocProvider<CarListBloc>(
+          create: (context) => CarListBloc(
             carRepository: carRepository,
-          )
-            ..add(LoadFilter())
-            ..add(LoadFilterButtonHeight()),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => FilterBloc(
+            carRepository: carRepository,
+          )..add(LoadFilter()),
         ),
         BlocProvider<OrdersCubit>(
           create: (context) => OrdersCubit(),

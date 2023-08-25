@@ -65,29 +65,29 @@ class _AppState extends State<App> {
           home: child,
         );
       },
-      child: BlocBuilder<AppBloc, AppState>(
-        builder: (context, state) {
-          if (state is Authenticated) {
-            if (widget.uid != null && widget.uid!.isNotEmpty) {
-                print('user Id: $widget.uid');
-                return const SplashScreen();
-              }
-            else {
-              return const SignUpScreen();
-            }
-          } else if (state is UnAuthenticated) {
-            // print('user Id: ${widget.uid}');
-            return const SplashScreen();
-          } else {
-            return Container();
-          }
-        },
-      ),
+      // child: BlocBuilder<AppBloc, AppState>(
+      //   builder: (context, state) {
+      //     if (state is Authenticated) {
+      //       if (widget.uid != null && widget.uid!.isNotEmpty) {
+      //           print('user Id: $widget.uid');
+      //           return const SplashScreen();
+      //         }
+      //       else {
+      //         return const SignUpScreen();
+      //       }
+      //     } else if (state is UnAuthenticated) {
+      //       // print('user Id: ${widget.uid}');
+      //       return const SplashScreen();
+      //     } else {
+      //       return Container();
+      //     }
+      //   },
+      // ),
       // child: ConfirmOrderPage(carId: 1,),
       // child: AuthenticationScreen(),
       // child: SignUpScreen(),
       // child: ProductOverview(index: 2),
-      // child: HomePage(),
+      child: HomePage(),
     );
   }
 }

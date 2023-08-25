@@ -1,15 +1,15 @@
 import 'package:cabriolet_sochi/src/features/home/data/models/filter_model.dart';
 import 'package:equatable/equatable.dart';
 
-class FilterBloc extends Equatable {
-  const FilterBloc({this.filter = const <Filter>[]});
+class FilterModel extends Equatable {
+  const FilterModel({this.filter = const <FilterItemModel>[]});
 
-  final List<Filter> filter;
+  final List<FilterItemModel> filter;
 
-  FilterBloc copyWith({
-    List<Filter>? filter,
+  FilterModel copyWith({
+    List<FilterItemModel>? filter,
   }) =>
-      FilterBloc(
+      FilterModel(
         filter: filter ?? this.filter,
       );
 

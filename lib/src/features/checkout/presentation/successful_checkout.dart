@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:cabriolet_sochi/src/constants/colors.dart';
 import 'package:cabriolet_sochi/src/constants/sizes.dart';
 import 'package:cabriolet_sochi/src/features/account/presentation/account_page.dart';
-import 'package:cabriolet_sochi/src/features/home/bloc/home_bloc.dart';
+import 'package:cabriolet_sochi/src/features/home/bloc/car_list/car_list_bloc.dart';
 import 'package:cabriolet_sochi/src/features/home/presentation/pages/home.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/account_page_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/app_bar_title.dart';
@@ -99,7 +99,7 @@ class _SuccessfulCheckoutScreenState extends State<SuccessfulCheckoutScreen> {
           );
           return shouldPop!;
         },
-        child: BlocBuilder<HomeBloc, HomeState>(
+        child: BlocBuilder<CarListBloc, CarListState>(
           builder: (context, state) {
             if (state is CarDataLoading) {
               return const Center(

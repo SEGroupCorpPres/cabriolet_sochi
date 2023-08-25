@@ -1,19 +1,19 @@
 import 'package:cabriolet_sochi/src/features/home/data/models/filter_items.dart';
 import 'package:equatable/equatable.dart';
 
-class Filter extends Equatable {
-  const Filter({required this.id, required this.filterItems, required this.value});
+class FilterItemModel extends Equatable {
+  const FilterItemModel({required this.id, required this.filterItems, required this.value});
 
   final int id;
   final FilterItems filterItems;
   final bool value;
 
-  Filter copyWith({
+  FilterItemModel copyWith({
     int? id,
     FilterItems? filterItems,
     bool? value,
   }) =>
-      Filter(
+      FilterItemModel(
         id: id ?? this.id,
         filterItems: filterItems ?? this.filterItems,
         value: value ?? this.value,
@@ -27,9 +27,9 @@ class Filter extends Equatable {
         value,
       ];
 
-  static List<Filter> filter = FilterItems.filterItems
+  static List<FilterItemModel> filter = FilterItems.filterItems
       .map(
-        (filterItem) => Filter(
+        (filterItem) => FilterItemModel(
           id: filterItem.id,
           filterItems: filterItem,
           value: false,

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:cabriolet_sochi/src/constants/colors.dart';
 import 'package:cabriolet_sochi/src/constants/sizes.dart';
 import 'package:cabriolet_sochi/src/features/account/presentation/account_page.dart';
-import 'package:cabriolet_sochi/src/features/home/bloc/home_bloc.dart';
+import 'package:cabriolet_sochi/src/features/home/bloc/car_list/car_list_bloc.dart';
 import 'package:cabriolet_sochi/src/features/orders/presentation/confirm_order.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/account_button.dart';
 import 'package:cabriolet_sochi/src/utils/widgets/account_page_button.dart';
@@ -36,12 +36,12 @@ class _ProductOverviewState extends State<ProductOverview> {
     // TODO: implement initState
     super.initState();
     index = widget.index;
-    BlocProvider.of<HomeBloc>(context).add(GetDataEvent());
+    BlocProvider.of<CarListBloc>(context).add(GetDataEvent());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeBloc, HomeState>(
+    return BlocBuilder<CarListBloc, CarListState>(
       builder: (context, state) {
         if (state is CarDataLoading) {
           return const Scaffold(

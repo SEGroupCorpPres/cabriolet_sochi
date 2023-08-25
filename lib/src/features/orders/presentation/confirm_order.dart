@@ -6,7 +6,7 @@ import 'package:cabriolet_sochi/src/constants/sizes.dart';
 import 'package:cabriolet_sochi/src/features/account/bloc/account_bloc.dart';
 import 'package:cabriolet_sochi/src/features/account/presentation/account_page.dart';
 import 'package:cabriolet_sochi/src/features/checkout/presentation/successful_checkout.dart';
-import 'package:cabriolet_sochi/src/features/home/bloc/home_bloc.dart';
+import 'package:cabriolet_sochi/src/features/home/bloc/car_list/car_list_bloc.dart';
 import 'package:cabriolet_sochi/src/features/orders/cubit/orders_cubit.dart';
 import 'package:cabriolet_sochi/src/features/orders/data/models/order_model.dart';
 import 'package:cabriolet_sochi/src/utils/services/order_notification.dart';
@@ -457,7 +457,7 @@ class _ConfirmOrderPageState extends State<ConfirmOrderPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BlocBuilder<HomeBloc, HomeState>(
+              BlocBuilder<CarListBloc, CarListState>(
                 builder: (context, state) {
                   if (state is CarDataLoading) {
                     return const Scaffold(
